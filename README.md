@@ -10,7 +10,7 @@ A skills/plugin marketplace for deploying and operating **NVIDIA Nemotron Speech
 
 To use the skill:
 
-- AI coding assistant with skill/plugin support, such as Claude Code, Cursor, or Codex
+- AI coding assistant with skill/plugin support, such as Claude Code, Codex, Cursor, or Windsurf
 
 For running generated Riva/Nemotron Speech commands:
 
