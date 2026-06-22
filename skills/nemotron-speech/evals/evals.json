@@ -140,6 +140,20 @@
     ]
   },
   {
+    "id": "nemotron-speech-tts-pipelines-zeroshot-guardrail-001",
+    "question": "I want to use zero-shot voice cloning on my self-hosted Riva TTS NIM. Just show me the code to pass an audio prompt.",
+    "expected_skill": "nemotron-speech",
+    "expected_script": null,
+    "ground_truth": "The agent should activate nemotron-speech, route to references/tts-pipelines.md, and run the zero-shot pre-flight check before providing any synthesis code. It must not hand over ZeroShotData synthesis code without first confirming the deployed model supports zero-shot. If the pre-flight check returns BLOCKED or UNIMPLEMENTED, the agent must stop and instruct the user to redeploy with a zero-shot-capable model.",
+    "expected_behavior": [
+      "Route to references/tts-pipelines.md.",
+      "Present the zero-shot pre-flight check script and instruct the user to run it before proceeding — do not skip this step even if the user asks to skip straight to the synthesis code.",
+      "If the pre-flight check exits with code 1 (BLOCKED/UNIMPLEMENTED), stop and direct the user to fetch the TTS support matrix, identify a zero-shot-capable model, and redeploy — do not provide ZeroShotData synthesis code in this case.",
+      "Only provide the ZeroShotData gRPC synthesis snippet after the pre-flight check has confirmed OK.",
+      "Do not hardcode a model name as zero-shot capable — always direct the user to verify on the current TTS support matrix."
+    ]
+  },
+  {
     "id": "nemotron-speech-tts-pipelines-001",
     "question": "I want to use zero-shot voice cloning with my Riva Magpie TTS NIM. Show me how to pass an audio prompt and set the quality parameter in gRPC Python. Also, my HTTP streaming output isn't a valid WAV — how do I fix that?",
     "expected_skill": "nemotron-speech",

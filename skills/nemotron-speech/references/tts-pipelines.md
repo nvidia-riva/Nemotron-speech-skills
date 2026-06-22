@@ -221,12 +221,86 @@ Do not infer key names or valid ranges from this skill's text — fetch the cust
 
 ## Zero-Shot Voice Cloning
 
-Zero-shot synthesis lets you synthesize in a new voice from a short audio prompt (reference audio + transcript), without fine-tuning. Support is **per-model** — verify on the customization page before attempting.
+Zero-shot synthesis lets you synthesize in a new voice from a short audio prompt (reference audio + transcript), without fine-tuning. Support is **per-model** — not all deployed NIMs expose this capability.
+
+> **Agent:** Run the pre-flight check below **before** providing zero-shot synthesis code or proceeding with any zero-shot workflow. Do not skip this step even if the user says "I already deployed the right model." A model that does not support zero-shot returns no error during deployment — the failure only surfaces at inference time as an `UNIMPLEMENTED` gRPC error or silent fallback. The pre-flight check catches this before the user wastes time preparing audio prompts.
+
+### Zero-Shot Pre-flight Check
+
+Run this probe to confirm that the deployed NIM actually supports zero-shot synthesis:
+
+```python
+#!/usr/bin/env python3
+import sys, riva.client
+from riva.client.proto.riva_tts_pb2 import (
+    RivaSynthesisConfigRequest, SynthesizeSpeechRequest, ZeroShotData,
+)
+from riva.client.proto.riva_audio_pb2 import AudioEncoding
+
+SERVER = "0.0.0.0:50051"   # adjust if cloud or non-default port
+
+auth = riva.client.Auth(uri=SERVER)
+tts  = riva.client.SpeechSynthesisService(auth)
+
+# Step 1 — confirm NIM is healthy and a model is loaded
+try:
+    cfg = tts.stub.GetRivaSynthesisConfig(
+        RivaSynthesisConfigRequest(), metadata=auth.get_auth_metadata()
+    )
+except Exception as e:
+    print(f"BLOCKED: NIM not reachable — {e}"); sys.exit(1)
+
+if not cfg.model_config:
+    print("BLOCKED: NIM responded but no TTS models are loaded."); sys.exit(1)
+
+for m in cfg.model_config:
+    print(f"Running model: {m.model_name}")
+
+# Step 2 — probe zero-shot capability with a minimal dummy request
+# The probe intentionally uses invalid audio data.
+# UNIMPLEMENTED / "not supported" → model does not support zero-shot → BLOCKED
+# INVALID_ARGUMENT / any other error → model accepts ZeroShotData but rejected bad input → OK
+try:
+    probe = SynthesizeSpeechRequest(
+        text="probe",
+        language_code="en-US",
+        encoding=AudioEncoding.LINEAR_PCM,
+        sample_rate_hz=22050,
+        zero_shot_data=ZeroShotData(
+            audio_prompt=b"\x00" * 100,   # intentionally invalid; triggers INVALID_ARGUMENT if supported
+            sample_rate_hz=16000,
+            encoding=AudioEncoding.LINEAR_PCM,
+            quality=1,
+            transcript="probe",
+        ),
+    )
+    tts.stub.Synthesize(probe, metadata=auth.get_auth_metadata())
+    # Unexpectedly succeeded — zero-shot is supported
+    print("OK: zero-shot is supported by the running model.")
+except Exception as e:
+    err = str(e).lower()
+    if "unimplemented" in err or "not supported" in err or "zero_shot" in err or "zero-shot" in err:
+        print(f"BLOCKED: the deployed model does not support zero-shot synthesis.\n  {e}")
+        print("\nNext steps:")
+        print("  1. Check the TTS support matrix for models that advertise zero-shot capability.")
+        print("  2. Redeploy using a zero-shot-capable model (e.g., a Magpie variant — verify on support matrix).")
+        print("  3. Re-run this check after redeployment before proceeding.")
+        sys.exit(1)
+    # Any other error (e.g., INVALID_ARGUMENT) means the server accepted ZeroShotData
+    # but rejected our dummy input — zero-shot IS available on this model
+    print(f"OK: zero-shot is supported (probe rejected dummy input as expected: {type(e).__name__}).")
+```
+
+**If the check exits with code 1:** stop here. Do not proceed with zero-shot synthesis. Redeploy with a zero-shot-capable model (fetch the TTS support matrix for the current list) and re-run the check.
+
+**If the check prints OK:** proceed with the synthesis steps below.
+
+---
 
 **Requirements (verify on the customization page):**
 - A 5–30 second clean audio clip of the target voice (WAV, mono, 16-bit PCM recommended)
 - The verbatim transcript of that audio clip
-- A model that supports zero-shot synthesis (verify per release)
+- A model that passed the pre-flight check above
 
 **`quality` parameter:** integer 1–40 (default 20). Higher values improve voice similarity at the cost of synthesis latency. Fetch the customization page for per-model guidance on valid range and recommended starting point.
 
@@ -375,6 +449,8 @@ Do not answer feature-support questions from this skill's text alone.
 - **HTTP streaming output not playable** — the `/v1/audio/synthesize_online` endpoint returns raw LPCM with no WAV header. Always wrap with `sox -b 16 -e signed -c 1 -r <rate> output.raw output.wav` using the exact rate you requested in the API call.
 - **`custom_configuration` key rejected or silently ignored** — key names and valid ranges are per-model and per-release. Fetch the customization page to confirm supported keys for your model.
 - **SSML tags silently ignored** — not all models support SSML, and models that do support a subset of tags. Fetch the customization page to confirm SSML support before debugging.
+- **Zero-shot pre-flight check exits with BLOCKED** — the deployed model does not support zero-shot synthesis. Fetch the TTS support matrix to identify a zero-shot-capable model, redeploy, and re-run the check before attempting synthesis.
+- **Zero-shot pre-flight check returns UNIMPLEMENTED** — same as above; `UNIMPLEMENTED` is the gRPC status code returned when the server has no handler for `ZeroShotData`. Redeploy with a supported model.
 - **Zero-shot voice similarity poor** — check audio prompt quality: background noise, resampling artifacts, clipping, or stereo-to-mono issues all degrade similarity. Use a clean mono 16-bit PCM prompt.
 - **Sample rate mismatch in sox conversion** — always pass to `sox` the exact `sample_rate_hz` you requested in the API call; a mismatch produces pitched-wrong or sped-up output.
 - **Voice name not recognized after custom NIM launch** — voice names exposed by a custom NIM depend on the trained checkpoint. Run `--list-voices` against the running NIM to discover the actual names.
