@@ -9,7 +9,7 @@ NVIDIA <br>
 ### License/Terms of Use: <br>
 CC-BY-4.0 AND Apache 2.0 <br>
 ## Use Case: <br>
-Developers and engineers deploying, testing, and operating NVIDIA Nemotron Speech (Riva) NIMs for ASR, TTS, and NMT workflows using AI coding assistants. <br>
+Developers and engineers deploying, testing, and operating NVIDIA Nemotron Speech (Riva) NIMs for automatic speech recognition, text-to-speech, and neural machine translation workflows. <br>
 
 ### Deployment Geography for Use: <br>
 Global <br>
@@ -19,20 +19,24 @@ Risk: Review before execution as proposals could introduce incorrect or misleadi
 Mitigation: Review and scan skill before deployment. <br>
 
 ## Reference(s): <br>
-- [ASR Reference](references/asr.md) <br>
-- [ASR Custom Model Deployment](references/asr-custom.md) <br>
-- [TTS Reference](references/tts.md) <br>
-- [NMT Reference](references/nmt.md) <br>
+- [ASR Deployment & Inference](references/asr.md) <br>
+- [TTS Deployment & Inference](references/tts.md) <br>
+- [NMT Deployment & Inference](references/nmt.md) <br>
+- [Custom ASR Model Deployment](references/asr-custom.md) <br>
+- [Custom TTS Model Deployment](references/tts-custom.md) <br>
+- [TTS Pipeline Configuration](references/tts-pipelines.md) <br>
+- [TTS Pronunciation](references/tts-pronunciation.md) <br>
+- [ASR Pipeline Configuration](references/pipelines.md) <br>
 - [Model Selection Guide](references/model-selection.md) <br>
+- [Environment Setup](references/setup.md) <br>
 - [Deployment Readiness Checks](references/deployment-readiness-checks.md) <br>
-- [Setup Guide](references/setup.md) <br>
-- [Pipeline Configuration](references/pipelines.md) <br>
-- [NVIDIA NIM Speech Documentation](https://docs.nvidia.com/nim/riva/latest/index.html) <br>
+- [NVIDIA NIM Speech Documentation](https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html) <br>
+- [NGC Model Catalog](https://catalog.ngc.nvidia.com/orgs/nim/teams/nvidia/models) <br>
 
 
 ## Skill Output: <br>
-**Output Type(s):** [Shell commands, Configuration instructions, API calls] <br>
-**Output Format:** [Markdown with inline bash code blocks] <br>
+**Output Type(s):** [Shell commands, Configuration instructions, Code, API Calls] <br>
+**Output Format:** [Markdown with inline bash and Python code blocks] <br>
 **Output Parameters:** [1D] <br>
 **Other Properties Related to Output:** [None] <br>
 
@@ -43,7 +47,7 @@ Mitigation: Review and scan skill before deployment. <br>
 
 
 ## Evaluation Tasks: <br>
-12 evaluation tasks (9 positive activation, 3 negative activation) with 2 attempts per task at 50% pass threshold. <br>
+18 evaluation tasks (14 positive skill-activation, 4 negative) in astra-sandbox environment using NVSkills-Eval external profile. <br>
 
 ## Evaluation Metrics Used: <br>
 Reported benchmark dimensions: <br>
@@ -54,6 +58,7 @@ Reported benchmark dimensions: <br>
 - Efficiency: Checks whether the agent uses fewer tokens and avoids redundant work. <br>
 
 Underlying evaluation signals used in this run: <br>
+- `security`: Checks for unsafe operations, secret leakage, and unauthorized access. <br>
 - `skill_execution`: Verifies that the agent loaded the expected skill and workflow. <br>
 - `skill_efficiency`: Checks routing quality, decoy avoidance, and redundant tool usage. <br>
 - `accuracy`: Grades final-answer correctness against the reference answer. <br>
@@ -66,11 +71,11 @@ Underlying evaluation signals used in this run: <br>
 ## Evaluation Results: <br>
 | Dimension | Num | `claude-code` | `codex` |
 |---|---:|---:|---:|
-| Security | 8 | 73% (-2%) | 78% (-2%) |
-| Correctness | 8 | 95% (+11%) | 91% (+6%) |
-| Discoverability | 8 | 92% (+30%) | 71% (-4%) |
-| Effectiveness | 8 | 84% (+3%) | 80% (+4%) |
-| Efficiency | 8 | 81% (+32%) | 54% (-6%) |
+| Security | 8 | 100% (+6%) | 92% (+14%) |
+| Correctness | 8 | 92% (+34%) | 86% (+16%) |
+| Discoverability | 8 | 99% (+62%) | 64% (+15%) |
+| Effectiveness | 8 | 81% (+24%) | 77% (+16%) |
+| Efficiency | 8 | 91% (+47%) | 53% (+8%) |
 
 ## Skill Version(s): <br>
 1.0.0 (source: frontmatter) <br>

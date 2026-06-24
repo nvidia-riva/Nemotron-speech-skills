@@ -7,11 +7,11 @@ This benchmark summarizes 3-Tier Evaluation from NVSkills-Eval results for the s
 ## Evaluation Summary
 
 - Skill: `nemotron-speech`
-- Evaluation date: 2026-05-28
+- Evaluation date: 2026-06-24
 - NVSkills-Eval profile: `external`
-- Environment: `local`
-- Dataset: 12 evaluation tasks
-- Attempts per task: 2
+- Environment: `astra-sandbox`
+- Dataset: 18 evaluation tasks
+- Attempts per task: 1
 - Pass threshold: 50%
 - Overall verdict: PASS
 
@@ -32,6 +32,7 @@ Reported benchmark dimensions:
 
 Underlying evaluation signals used in this run:
 
+- `security` (Security): checks for unsafe operations, secret leakage, and unauthorized access.
 - `skill_execution` (Skill Execution): verifies that the agent loaded the expected skill and workflow.
 - `skill_efficiency` (Efficiency): checks routing quality, decoy avoidance, and redundant tool usage.
 - `accuracy` (Accuracy): grades final-answer correctness against the reference answer.
@@ -41,10 +42,10 @@ Underlying evaluation signals used in this run:
 
 ## Test Tasks
 
-The benchmark dataset contained 12 evaluation tasks:
+The benchmark dataset contained 18 evaluation tasks:
 
-- Positive tasks: 9 tasks where the skill was expected to activate.
-- Negative tasks: 3 tasks where no skill was expected.
+- Positive tasks: 14 tasks where the skill was expected to activate.
+- Negative tasks: 4 tasks where no skill was expected.
 - Unlabeled tasks: 0 tasks where positive/negative intent could not be inferred.
 
 Task composition is derived from the evaluation dataset when possible. Entries with `expected_skill` set are treated as positive skill-activation cases, while entries with `expected_skill: null` are treated as negative activation cases.
@@ -53,34 +54,25 @@ Task composition is derived from the evaluation dataset when possible. Entries w
 
 | Dimension | Num | `claude-code` | `codex` |
 |---|---:|---:|---:|
-| Security | 8 | 73% (-2%) | 78% (-2%) |
-| Correctness | 8 | 95% (+11%) | 91% (+6%) |
-| Discoverability | 8 | 92% (+30%) | 71% (-4%) |
-| Effectiveness | 8 | 84% (+3%) | 80% (+4%) |
-| Efficiency | 8 | 81% (+32%) | 54% (-6%) |
+| Security | 8 | 100% (+6%) | 92% (+14%) |
+| Correctness | 8 | 92% (+34%) | 86% (+16%) |
+| Discoverability | 8 | 99% (+62%) | 64% (+15%) |
+| Effectiveness | 8 | 81% (+24%) | 77% (+16%) |
+| Efficiency | 8 | 91% (+47%) | 53% (+8%) |
 
 Score values show skill-assisted performance. Values in parentheses show uplift versus the no-skill baseline when baseline data is available.
 
 ## Tier 1: Static Validation Summary
 
-Tier 1 validation passed with observations. NVSkills-Eval ran 9 checks and found 9 total findings.
+Tier 1 validation passed with observations. NVSkills-Eval ran 1 checks and found 1 total findings.
 
 Top findings:
 
-- MEDIUM QUALITY/quality_correctness: No documented scripts in table format (`skills/nemotron-speech/SKILL.md`)
-- MEDIUM QUALITY/quality_correctness: Instructions don't mention 'run_script' (`skills/nemotron-speech/SKILL.md`)
-- MEDIUM QUALITY/quality_efficiency: Deeply nested references in tts.md (`skills/nemotron-speech/SKILL.md`)
-- LOW QUALITY/quality_discoverability: Description doesn't mention WHEN to use this skill (`skills/nemotron-speech/SKILL.md`)
-- LOW QUALITY/quality_efficiency: Non-descriptive filename: tts.md (`skills/nemotron-speech/SKILL.md`)
+- LOW SCHEMA/author_format: Author must be of the form 'Name <email@host>' (`skills/nemotron-speech/SKILL.md`)
 
 ## Tier 2: Deduplication Summary
 
-Tier 2 validation passed. NVSkills-Eval ran 2 checks and found 0 total findings.
-
-Notable observations:
-
-- Context Deduplication: Collected 10 file(s)
-- Inter-Skill Deduplication: Parsed skill 'nemotron-speech': 132 char description
+This tier was not run or did not produce findings in this report.
 
 ## Publication Recommendation
 
