@@ -29,6 +29,25 @@ vocab/pronunciation / n-gram LM → fine-tune → (last resort) train from scrat
 method only if quality is short of target. You may **run a cheap-rung experiment now while presenting the full
 fine-tuning plan** so the user sees the trade-off. State which sub-skills the chosen path will use.
 
+## 3b. Branch by rung — *Orchestration*
+
+**Stages 4–8 below are the fine-tune–shaped loop** (`data → NeMo train → NeMo eval → Riva deploy`). Do **not** force a
+cheaper rung through it — each rung has its own shorter shape, owned end-to-end by **one** sub-skill. Pick the branch,
+then announce steps for *that* branch (the "Step N/8" count only applies to the full fine-tune path):
+
+| Chosen rung | Flow | Owner(s) | Eval surface |
+|---|---|---|---|
+| **Word boosting** | runtime word list → serve (no build) | `nemotron-speech` | served-endpoint WER |
+| **Custom vocab / pronunciation** | `riva-build` vocab/lexicon → serve | `nemotron-speech` | served-endpoint WER |
+| **N-gram LM — pilot (NeMo)** | build KenLM → `beam_batch` greedy-vs-LM eval; **no deploy** | `nemo-speech-asr-finetune` | offline file WER |
+| **N-gram LM — deploy (Riva)** | build word-level KenLM+vocab → `riva-build` flashlight → serve | `nemotron-speech` | served-endpoint WER |
+| **Fine-tune / from-scratch** | full Stages 4–8 | Data → `nemo-speech-asr-finetune` → `nemotron-speech` | offline WER (train) **and** served WER (post-deploy) |
+
+Key consequences: the **n-gram LM does not follow `train(NeMo) → eval(NeMo) → deploy(Riva)`** — its pilot and deploy
+realizations are different artifacts (see [`path-selection.md`](path-selection.md)); if the user wants to ship, route
+straight to `nemotron-speech` and build the Riva-format LM there, optionally after a NeMo pilot. Anything **served** is
+evaluated on the running NIM (**served-endpoint WER**, owned by `nemotron-speech`), not via the offline NeMo eval.
+
 ## 4. Get the data right — *SDG / Data*
 
 Only when the path needs training data and it is scarce or noisy. Delegate to the data sub-skill(s):
@@ -64,6 +83,12 @@ Delegate to `nemo-speech-asr-finetune` and use its evaluation stage:
 - **A/B forgetting check** on a general set to catch regressions from adaptation.
 - **Error-driven analysis** (numbers, entities, jargon, accents, noise, long audio) to identify the next lever.
 - For streaming models, evaluate with the cache-aware streaming inference path at a trained `att_context_size`.
+
+**Two eval surfaces — use the one that matches the branch (see [`sub-skills.md`](sub-skills.md)):** offline file WER on
+a `.nemo`/`.riva` (`speech_to_text_eval.py` / `beam_batch`) is owned by `nemo-speech-asr-finetune`; **served-endpoint
+WER** (a client scoring the running NIM) is owned by `nemotron-speech`. For any served rung (boosting, custom vocab,
+n-gram LM deploy, or a fine-tune after deploy), measure on the **served endpoint** — in-NeMo numbers can differ from what
+the deployed decoder actually produces.
 
 ## 7. Loop or ship — *Orchestration*
 

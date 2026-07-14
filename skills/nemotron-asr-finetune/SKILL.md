@@ -73,6 +73,8 @@ Run the loop below; each stage names the sub-skill it invokes. Full detail in [`
 | 7 | **Loop or ship** | If short of target, loop to 4/5 with targeted data; else select/average checkpoints. Consult the user before more cycles. | Orchestration |
 | 8 | **Deploy** | Export to NIM/HF, hot-swap the checkpoint, serve. | Deployment / Optimization |
 
+**Stages 4–8 are the fine-tune path** (`data → NeMo train → NeMo eval → Riva deploy`). Cheaper rungs (boosting, custom vocab, n-gram LM) take a **shorter branch owned by a single sub-skill** — don't force them through the full loop. See the branch-by-rung table in [`references/workflow.md`](references/workflow.md) (§3b).
+
 Throughout, answer the **"along the way"** questions (data volume, synthetic vs real, hours to reach a WER target, cost, GPU choice) — see [`references/planning-answers.md`](references/planning-answers.md).
 
 ## Sub-Skills This Skill Calls
@@ -83,7 +85,7 @@ Detailed registry, invocation, and handoff contracts in [`references/sub-skills.
 |---|---|---|
 | **Research / Training** | NeMo configs, recipes, fine-tuning, checkpoint averaging | `nemo-speech-asr-finetune` |
 | **SDG / Data Designer** | Synthetic transcripts/text, noise profiling, vendor-data impact, blends | `data-designer` (synthetic **text**; audio via TTS in `nemotron-speech`); *placeholder:* `asr-data-profiling` |
-| **Evaluation** | Normalized WER, A/B forgetting, error analysis | `nemo-speech-asr-finetune` (its evaluation stage) |
+| **Evaluation** | Normalized WER, A/B forgetting, error analysis | Offline file WER → `nemo-speech-asr-finetune`; **served-endpoint WER → `nemotron-speech`** |
 | **Deployment / Optimization** | NIM/Riva export, checkpoint swap, NIM-build optimization, serving | `nemotron-speech` |
 
 If a sub-skill is unavailable, say so, give the interim guidance from the reference, and continue the plan.
@@ -93,7 +95,8 @@ If a sub-skill is unavailable, say so, give the interim guidance from the refere
 The scoping in Stage 3 selects the lowest-cost rung that can meet the target. Summary; full docs-grounded ladder in [`references/path-selection.md`](references/path-selection.md).
 
 - **Word boosting** — a bounded set of known words/names/jargon. Runtime, no training. → Deployment sub-skill.
-- **Custom vocabulary / pronunciation / n-gram (KenLM) LM** — domain phrasing/vocab when you have text but little audio. Cheap, decoding-time. → build via Research/Training + SDG, deploy via Deployment.
+- **Custom vocabulary / pronunciation** — OOV or consistently mispronounced terms. Deploy-time. → Deployment sub-skill.
+- **N-gram (KenLM) LM** — domain phrasing/word-sequences when you have text but little audio. **Two realizations that are different artifacts:** *pilot (NeMo)* to prove lift offline (`nemo-speech-asr-finetune`), or *deploy (Riva)* to ship it (`nemotron-speech`). Don't ship the pilot LM — rebuild it in Riva word-level format. See [`references/path-selection.md`](references/path-selection.md).
 - **Fine-tune** — real acoustic gaps (accents, noise, channel) with enough transcribed audio (NIM guide: 100+ h; ~10 h floor only if mixed to avoid catastrophic forgetting). → Research/Training.
 - **Train from scratch / cross-language transfer** — a new language with no suitable checkpoint (last resort). → Research/Training.
 
@@ -118,6 +121,7 @@ Ordering and per-model support follow the NVIDIA Speech NIM ASR customization gu
 | ASR support matrix (models & features) | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html |
 | NeMo fine-tuning (flags/config) | `docs/source/asr/fine_tuning.rst`, and the `nemo-speech-asr-finetune` sub-skill |
 | Riva ASR tutorials (boosting, LM, fine-tune) | https://github.com/nvidia-riva/tutorials |
+| Tokenizer extension to new language + acoustic fine-tune | https://github.com/nvidia-riva/tutorials/blob/main/asr-extend-tokenizer-to-newlang-ft-acoustic-model.ipynb |
 
 ## Limitations
 
