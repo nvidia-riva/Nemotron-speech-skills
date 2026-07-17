@@ -1,6 +1,6 @@
-# Nemotron-speech Skills
+# Nemotron Speech Skills
 
-A skills/plugin marketplace for deploying and operating **NVIDIA Nemotron Speech** (formerly [NVIDIA Riva](https://docs.nvidia.com/nim/riva/latest/index.html)) Speech NIMs with Claude Code, Codex, and compatible AI coding assistants.
+A skills/plugin marketplace for customizing, deploying, and operating **NVIDIA Nemotron Speech** (formerly [NVIDIA Riva](https://docs.nvidia.com/nim/riva/latest/index.html)) Speech NIMs with Claude Code, Codex, and compatible AI coding assistants.
 
 > Disclaimer: AI coding assistants can accelerate setup, deployment, and
 > prototyping, but generated commands and code are development starting points.
@@ -8,20 +8,29 @@ A skills/plugin marketplace for deploying and operating **NVIDIA Nemotron Speech
 
 ## Prerequisites
 
-To use the skill:
+To use the skills for planning and guidance:
 
 - AI coding assistant with skill/plugin support, such as Claude Code, Cursor, or Codex
 
-For running generated Riva/Nemotron Speech commands:
+Additional requirements depend on the workflow. Running self-hosted Riva/Nemotron Speech commands may require:
 
 - NVIDIA AI Enterprise entitlement for self-hosted Riva NIMs
 - Supported NVIDIA GPU, driver, OS, Docker, and NVIDIA Container Toolkit
 - NGC API key for self-hosted registry access, or `NVIDIA_API_KEY` for cloud-hosted build.nvidia.com inference
 - `nvidia-riva-client` for Python client examples
 
-## Skill
+Executing an ASR fine-tuning plan also requires suitable transcribed audio, a supported NeMo training environment, and GPU capacity. A GPU or API key is not required to use the orchestration skill for planning.
 
-A single umbrella skill — **`nemotron-speech`** — covers all Speech NIM workflows. The skill body is a routing surface; detailed per-workflow content lives in reference files loaded on demand (progressive disclosure).
+## Skills
+
+| Skill | What it covers |
+|---|---|
+| [`nemotron-speech`](skills/nemotron-speech/SKILL.md) | Select, deploy, run, customize, and troubleshoot ASR, TTS, and NMT Speech NIMs |
+| [`nemotron-asr-finetune`](skills/nemotron-asr-finetune/SKILL.md) | Plan ASR domain or language adaptation and route work through the cheapest sufficient customization path |
+
+### `nemotron-speech`
+
+The **`nemotron-speech`** skill covers Speech NIM deployment and operation. Its body is a routing surface; detailed per-workflow content lives in reference files loaded on demand.
 
 | Reference | What it covers |
 |---|---|
@@ -34,9 +43,27 @@ A single umbrella skill — **`nemotron-speech`** — covers all Speech NIM work
 | `references/tts.md` | Deploy and run Riva TTS (text-to-speech) NIMs |
 | `references/nmt.md` | Deploy and run Riva NMT (neural machine translation) NIMs |
 
+### `nemotron-asr-finetune`
+
+The **`nemotron-asr-finetune`** skill is a high-level orchestrator for improving ASR accuracy in a domain or language. It scopes the data, quality target, latency, hardware, and deployment constraints; establishes a measured baseline; and chooses the cheapest sufficient path:
+
+1. Word boosting or custom vocabulary for a bounded set of terms
+2. An n-gram language model for domain phrasing when text is available
+3. NeMo fine-tuning for acoustic gaps such as accents, noise, or channel conditions
+4. Cross-language transfer or training from scratch as a last resort
+
+For a fine-tuning path, it coordinates data preparation, NeMo training, normalized WER evaluation with a general-domain forgetting check, and Riva deployment. It delegates execution to specialized skills and provides interim guidance when a required sub-skill is not yet available.
+
+| Reference | What it covers |
+|---|---|
+| [`references/workflow.md`](skills/nemotron-asr-finetune/references/workflow.md) | End-to-end orchestration stages and branch-specific workflows |
+| [`references/path-selection.md`](skills/nemotron-asr-finetune/references/path-selection.md) | Cheapest-sufficient customization ladder and escalation rules |
+| [`references/planning-answers.md`](skills/nemotron-asr-finetune/references/planning-answers.md) | Data volume, synthetic data, cost, training time, and GPU guidance |
+| [`references/sub-skills.md`](skills/nemotron-asr-finetune/references/sub-skills.md) | Delegation registry and handoff contracts for training, data, evaluation, and deployment |
+
 ## Example prompts
 
-Things you can ask once the skill is installed:
+Things you can ask once the skills are installed:
 
 - *"Which Riva model should I use for real-time call-center transcription with low latency, punctuation, and a path to self-host later?"*
 - *"Help me set up a fresh Ubuntu machine for Riva NIMs, including Docker, the NVIDIA Container Toolkit, NGC login, and the Riva Python client."*
@@ -47,10 +74,14 @@ Things you can ask once the skill is installed:
 - *"I fine-tuned an ASR model in NeMo and have a .nemo checkpoint. Convert it into a Riva NIM with riva-build and riva-deploy."*
 - *"Tune a Riva ASR pipeline with Silero VAD, Sortformer diarization, a KenLM language model, and smaller chunk size for lower latency."*
 - *"Can my L4 GPU run the Riva ASR NIM I picked? The container also never reaches ready."*
+- *"My call-center ASR gets product names wrong. What is the cheapest way to improve it?"*
+- *"How much transcribed audio and GPU time do I need to fine-tune ASR for Indian English?"*
+- *"Help me reduce domain WER without causing catastrophic forgetting on general speech."*
+- *"Should I use word boosting, a KenLM language model, or fine-tuning for medical terminology?"*
 
 ## Installation
 
-The skill follows the [agentskills.io specification](https://agentskills.io/specification) and lives at the `skills/` path at the repo root — a layout recognized by Claude Code, Cursor, Codex, Windsurf, and other compatible agents. Pick the section below that matches your tool.
+The skills follow the [agentskills.io specification](https://agentskills.io/specification) and live under the `skills/` path at the repo root — a layout recognized by Claude Code, Cursor, Codex, Windsurf, and other compatible agents. Pick the section below that matches your tool.
 
 ### Claude Code
 
@@ -97,17 +128,18 @@ url  = "https://github.com/nvidia-riva/Nemotron-speech-skills.git"
 
 ### Cursor
 
-Clone the repo and reference the skill directory from your project's `.cursor/rules/` or via Cursor's settings → Rules → "Add rule from path":
+Clone the repo and reference both skill directories from your project's `.cursor/rules/` or via Cursor's settings → Rules → "Add rule from path":
 
 ```bash
 git clone https://github.com/nvidia-riva/Nemotron-speech-skills.git ~/agent-skills/nemotron-speech-skills
 ```
 
-Then in your Cursor project, add a rule pointing at `~/agent-skills/nemotron-speech-skills/skills/nemotron-speech/SKILL.md`, or symlink the skill into your project:
+Then add rules pointing at both `SKILL.md` files, or symlink both skill directories into your project:
 
 ```bash
 mkdir -p .cursor/rules
 ln -s ~/agent-skills/nemotron-speech-skills/skills/nemotron-speech .cursor/rules/nemotron-speech
+ln -s ~/agent-skills/nemotron-speech-skills/skills/nemotron-asr-finetune .cursor/rules/nemotron-asr-finetune
 ```
 
 ### Windsurf
@@ -122,25 +154,30 @@ Then add to your project's `.windsurfrules`:
 
 ```text
 @include ~/agent-skills/nemotron-speech-skills/skills/nemotron-speech/SKILL.md
+@include ~/agent-skills/nemotron-speech-skills/skills/nemotron-asr-finetune/SKILL.md
 ```
 
 ### Other agentskills.io-compatible agents
 
-For any agent that follows the [agentskills.io specification](https://agentskills.io/specification) and auto-discovers skills under `skills/` or `.agents/skills/`, clone the repo into your workspace and the skill will be picked up automatically:
+For any agent that follows the [agentskills.io specification](https://agentskills.io/specification) and auto-discovers skills under `skills/` or `.agents/skills/`, clone the repo into your workspace and the skills will be picked up automatically:
 
 ```bash
 git clone https://github.com/nvidia-riva/Nemotron-speech-skills.git
 ```
 
-The skill activates on trigger phrases listed in `skills/nemotron-speech/SKILL.md` (e.g., "deploy Riva ASR", "Magpie TTS", "Nemotron Speech NIM", etc.) — no per-agent config needed beyond making the repo visible.
+Each skill activates on the trigger phrases in its `SKILL.md`. For example, deployment prompts such as "deploy Riva ASR" route to `nemotron-speech`, while requests such as "improve ASR accuracy for my domain" route to `nemotron-asr-finetune`. No per-agent configuration is needed beyond making the repo visible.
 
-### Verifying the skill is loaded
+### Verifying the skills are loaded
 
-After installation, ask your agent something like:
+After installation, test both routing paths:
 
 > "Help me choose a Riva ASR model for low-latency English transcription."
 
-If installed correctly, the agent should respond by routing to the `nemotron-speech` skill and consulting `references/model-selection.md`.
+This should route to `nemotron-speech` and consult its model-selection guidance.
+
+> "My ASR gets domain jargon wrong. Help me choose the cheapest way to improve its accuracy."
+
+This should route to `nemotron-asr-finetune`, scope the problem, establish a baseline, and compare word boosting, language-model adaptation, and fine-tuning before recommending a path.
 
 ## Third-Party Notices
 
