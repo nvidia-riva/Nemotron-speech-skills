@@ -1,6 +1,6 @@
 # Nemotron Speech Skills
 
-A skills/plugin marketplace for customizing, deploying, and operating **NVIDIA Nemotron Speech** (formerly [NVIDIA Riva](https://docs.nvidia.com/nim/riva/latest/index.html)) Speech NIMs with Claude Code, Codex, and compatible AI coding assistants.
+A growing collection of skills and plugins for customizing, deploying, and operating **NVIDIA Nemotron Speech** (formerly [NVIDIA Riva](https://docs.nvidia.com/nim/riva/latest/index.html)) Speech NIMs with Claude Code, Codex, and compatible AI coding assistants.
 
 > Disclaimer: AI coding assistants can accelerate setup, deployment, and
 > prototyping, but generated commands and code are development starting points.
@@ -21,7 +21,11 @@ Additional requirements depend on the workflow. Running self-hosted Riva/Nemotro
 
 Executing an ASR fine-tuning plan also requires suitable transcribed audio, a supported NeMo training environment, and GPU capacity. A GPU or API key is not required to use the orchestration skill for planning.
 
-## Skills
+Skill-specific requirements are documented in each skill and may expand as new workflows are added.
+
+## Available skills
+
+Each top-level directory under `skills/` is an independently discoverable skill. The catalog below lists the skills currently included in this repository; new skills can be added without changing the repository-level installation model.
 
 | Skill | What it covers |
 |---|---|
@@ -81,7 +85,7 @@ Things you can ask once the skills are installed:
 
 ## Installation
 
-The skills follow the [agentskills.io specification](https://agentskills.io/specification) and live under the `skills/` path at the repo root — a layout recognized by Claude Code, Cursor, Codex, Windsurf, and other compatible agents. Pick the section below that matches your tool.
+The repository follows the [agentskills.io specification](https://agentskills.io/specification). Every skill lives in its own directory under `skills/`, allowing compatible agents to discover the current catalog and future additions from the same installation. Pick the section below that matches your tool.
 
 ### Claude Code
 
@@ -128,38 +132,44 @@ url  = "https://github.com/nvidia-riva/Nemotron-speech-skills.git"
 
 ### Cursor
 
-Clone the repo and reference both skill directories from your project's `.cursor/rules/` or via Cursor's settings → Rules → "Add rule from path":
+Clone the repository, then register its skill directories from your project's `.cursor/rules/` or via Cursor's settings → Rules → "Add rule from path":
 
 ```bash
 git clone https://github.com/nvidia-riva/Nemotron-speech-skills.git ~/agent-skills/nemotron-speech-skills
 ```
 
-Then add rules pointing at both `SKILL.md` files, or symlink both skill directories into your project:
+The following discovers every current skill instead of naming them individually:
 
 ```bash
 mkdir -p .cursor/rules
-ln -s ~/agent-skills/nemotron-speech-skills/skills/nemotron-speech .cursor/rules/nemotron-speech
-ln -s ~/agent-skills/nemotron-speech-skills/skills/nemotron-asr-finetune .cursor/rules/nemotron-asr-finetune
+for skill_dir in ~/agent-skills/nemotron-speech-skills/skills/*; do
+  skill_name=$(basename "$skill_dir")
+  test -e ".cursor/rules/$skill_name" || ln -s "$skill_dir" ".cursor/rules/$skill_name"
+done
 ```
+
+After pulling repository updates, rerun the loop to register newly added skills.
 
 ### Windsurf
 
-Windsurf reads `.windsurfrules` or per-project rules. Clone the repo and reference the skill from your project:
+Windsurf reads `.windsurfrules` or per-project rules. Clone the repository and add one include for each skill you want to enable:
 
 ```bash
 git clone https://github.com/nvidia-riva/Nemotron-speech-skills.git ~/agent-skills/nemotron-speech-skills
 ```
 
-Then add to your project's `.windsurfrules`:
+For example, the current catalog can be included with:
 
 ```text
 @include ~/agent-skills/nemotron-speech-skills/skills/nemotron-speech/SKILL.md
 @include ~/agent-skills/nemotron-speech-skills/skills/nemotron-asr-finetune/SKILL.md
 ```
 
+Repeat the include pattern for any skills added later.
+
 ### Other agentskills.io-compatible agents
 
-For any agent that follows the [agentskills.io specification](https://agentskills.io/specification) and auto-discovers skills under `skills/` or `.agents/skills/`, clone the repo into your workspace and the skills will be picked up automatically:
+For any agent that follows the [agentskills.io specification](https://agentskills.io/specification) and auto-discovers skills under `skills/` or `.agents/skills/`, clone the repository into your workspace. Every current or future skill under `skills/` will be discovered automatically:
 
 ```bash
 git clone https://github.com/nvidia-riva/Nemotron-speech-skills.git
@@ -167,9 +177,9 @@ git clone https://github.com/nvidia-riva/Nemotron-speech-skills.git
 
 Each skill activates on the trigger phrases in its `SKILL.md`. For example, deployment prompts such as "deploy Riva ASR" route to `nemotron-speech`, while requests such as "improve ASR accuracy for my domain" route to `nemotron-asr-finetune`. No per-agent configuration is needed beyond making the repo visible.
 
-### Verifying the skills are loaded
+### Verifying skill discovery
 
-After installation, test both routing paths:
+After installation, test representative prompts from the current catalog:
 
 > "Help me choose a Riva ASR model for low-latency English transcription."
 
@@ -178,6 +188,8 @@ This should route to `nemotron-speech` and consult its model-selection guidance.
 > "My ASR gets domain jargon wrong. Help me choose the cheapest way to improve its accuracy."
 
 This should route to `nemotron-asr-finetune`, scope the problem, establish a baseline, and compare word boosting, language-model adaptation, and fine-tuning before recommending a path.
+
+As new skills are added, verify each one with a prompt matching the triggers documented in its `SKILL.md`.
 
 ## Third-Party Notices
 
