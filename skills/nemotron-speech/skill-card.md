@@ -30,8 +30,8 @@ Mitigation: Review and scan skill before deployment. <br>
 - [Model Selection Guide](references/model-selection.md) <br>
 - [Environment Setup](references/setup.md) <br>
 - [Deployment Readiness Checks](references/deployment-readiness-checks.md) <br>
-- [NVIDIA NIM Speech Documentation](https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html) <br>
-- [NGC Model Catalog](https://catalog.ngc.nvidia.com/orgs/nim/teams/nvidia/models) <br>
+- [NVIDIA Speech NIM Documentation](https://docs.nvidia.com/nim/speech/latest/index.html) <br>
+- [NGC Model Catalog](https://catalog.ngc.nvidia.com/models) <br>
 
 
 ## Skill Output: <br>

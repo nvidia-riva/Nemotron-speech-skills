@@ -12,14 +12,15 @@ Deploy a custom or fine-tuned TTS pipeline as a Riva NIM when pre-built NIMs do 
 
 | Question type | Fetch this page |
 |---|---|
-| **Per-model `riva-build` syntax, inline `nemo2riva` source_path config, supported NeMo architectures, config names per model family** | https://docs.nvidia.com/nim/speech/latest/tts/customization/pipeline-configuration.html |
-| Current NGC `_finetune` artifacts (`deployable` `.riva` and `trainable` `.nemo` versions) | https://catalog.ngc.nvidia.com/orgs/nim/teams/nvidia/models |
+| **Custom deployment workflow, `.nemo` / `.riva` artifact paths, `riva-build` / `riva-deploy` syntax, and model-specific examples** | https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html |
+| Current Magpie TTS artifacts (`deployable` `.riva` and `trainable` `.nemo` versions) | https://catalog.ngc.nvidia.com/orgs/nvidia/riva/models/speechsynthesis_multilingual_magpietts_ipa/- |
 | Which base NIM container image to use for a given TTS model family | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/tts.html |
 | GPU / VRAM / driver minimums | https://docs.nvidia.com/nim/speech/latest/get-started/prerequisites.html |
 | Live, version-accurate parameter list (run inside the container) | `riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> -h` |
-| Runtime feature support — zero-shot, SSML, custom dictionaries, `custom_configuration` keys | https://docs.nvidia.com/nim/speech/latest/tts/customization/customization.html |
+| Runtime SSML, custom dictionaries, and `custom_configuration` keys | https://docs.nvidia.com/nim/speech/latest/tts/customization.html |
+| Zero-shot voice cloning | https://docs.nvidia.com/nim/speech/latest/tts/voice-cloning.html |
 
-**Do not infer from this skill's text:** which base container image to use for a specific TTS model family, the exact `nemo2riva` inline-config block for a given architecture, or what the current `riva-build` defaults are. The pipeline-configuration page (per-model build commands + Notes sections), NGC catalog, and `--help` output are authoritative.
+**Do not infer from this skill's text:** which base container image to use for a specific TTS model family, the exact `nemo2riva` inline-config block for a given architecture, or what the current `riva-build` defaults are. The custom-deployment page, the model's NGC page, and the image-specific `--help` output are authoritative.
 
 ## Workflow
 
@@ -29,7 +30,7 @@ Deploy a custom or fine-tuned TTS pipeline as a Riva NIM when pre-built NIMs do 
 
 - Complete [`setup.md`](setup.md): NVIDIA Container Toolkit, `NGC_API_KEY` exported (driver minimum: see prerequisites page cited above)
 - If no NeMo fine-tuning was performed, use a `deployable_vX.Y` `.riva` artifact from the model's NGC `_finetune` package.
-- Use `trainable_vX.Y` / `.nemo` only when the user has fine-tuned with NeMo. Fine-tuned `.nemo` checkpoints are passed directly to `riva-build` via the inline `nemo2riva` `source_path` config. The exact inline config must be copied from the **Notes section for that model** in the pipeline configuration page.
+- Use `trainable_vX.Y` / `.nemo` only when the user has fine-tuned with NeMo. Fine-tuned `.nemo` checkpoints are passed directly to `riva-build` via the inline `nemo2riva` `source_path` config. Use the model-specific example on the custom-deployment page when one is documented, and confirm the config against `riva-build ... -h` in the matching image.
 
 ## Instructions
 
@@ -53,11 +54,11 @@ Use `deployable_vX.Y` versions from the model's `_finetune` package. These conta
 
 **Option B — Use your own fine-tuned NeMo checkpoint (`.nemo`):**
 
-Do this only when the user has a `.nemo` checkpoint from NeMo fine-tuning. Pass the `.nemo` file directly to `riva-build` via the inline `nemo2riva` block in `source_path`. The inline-config syntax is **per model family** and is documented in the **Notes section for each model** in the pipeline-configuration page:
+Do this only when the user has a `.nemo` checkpoint from NeMo fine-tuning. Pass the `.nemo` file directly to `riva-build` via the inline `nemo2riva` block in `source_path`. The inline-config syntax is **per model family**. Use the **Riva Build** section and the model-specific examples on the custom-deployment page:
 
-https://docs.nvidia.com/nim/speech/latest/tts/customization/pipeline-configuration.html
+https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html
 
-Do not use a separate `nemo2riva` GitHub repo; use the inline method documented for `riva-build`.
+Confirm the documented example against `riva-build ... -h` inside the matching NIM image. Do not copy an inline block from a different model family.
 
 ---
 
@@ -90,17 +91,17 @@ docker run --gpus all -it --rm \
 
 > **`--ulimit nofile=65536:65536`** raises the file-descriptor cap inside the build container. Without it, certain large-model edge cases can cascade into `OSError: Too many open files` during cleanup.
 
-Inside the container, run `riva-build`. The `--config-path` and `--config-name` values are per TTS model family — fetch or open the pipeline-configuration page to find the correct values for your model:
+Inside the container, run `riva-build`. The `--config-path` and `--config-name` values are per TTS model family — fetch or open the custom-deployment page and confirm the values with the image-specific `--help` output:
 
 **Starting from a `.riva` artifact:**
 
 ```bash
-riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name-from-pipeline-page> \
+riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> \
   output_path=/riva_build_deploy/custom_model.rmir \
   'source_path=[/riva_build_deploy/model.riva]'
 
 # Force overwrite if .rmir already exists
-riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name-from-pipeline-page> \
+riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> \
   force=true \
   output_path=/riva_build_deploy/custom_model.rmir \
   'source_path=[/riva_build_deploy/model.riva]'
@@ -111,13 +112,13 @@ riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-con
 **Starting from a `.nemo` checkpoint (inline `nemo2riva` config):**
 
 ```bash
-# Inline nemo2riva block — exact form is per model family; copy from the Notes section on the pipeline-configuration page
-riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name-from-pipeline-page> \
+# Inline nemo2riva block — exact form is per model family; use the matching custom-deployment example
+riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> \
   output_path=/riva_build_deploy/custom_model.rmir \
-  'source_path=[{path: /riva_build_deploy/model.nemo, nemo2riva: {<flags-from-pipeline-page>}}]'
+  'source_path=[{path: /riva_build_deploy/model.nemo, nemo2riva: {<model-specific-conversion-options>}}]'
 ```
 
-The inline `nemo2riva` block is **per model family** — always look up the exact form for your architecture in the **Notes section** under each model's build command on the pipeline-configuration page.
+The inline `nemo2riva` block is **per model family** — use the matching example on the custom-deployment page and verify available parameters with `riva-build ... -h` in the same image.
 
 For the full parameter set and current per-config options, run `riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> -h` inside the container.
 
@@ -223,7 +224,7 @@ python3 python-clients/scripts/tts/talk.py \
   --list-voices
 ```
 
-For runtime feature support (SSML, zero-shot, custom dictionaries) on your custom model, fetch the customization page — feature support depends on the underlying model architecture.
+For runtime feature support on your custom model, fetch the customization page for SSML and custom dictionaries, and the voice-cloning page for zero-shot synthesis. Feature support depends on the underlying model architecture.
 
 ---
 
@@ -232,17 +233,17 @@ For runtime feature support (SSML, zero-shot, custom dictionaries) on your custo
 **Build RMIR from a `.riva` artifact (inside NIM container):**
 
 ```bash
-riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name-from-pipeline-page> \
+riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> \
   output_path=/riva_build_deploy/model.rmir \
   'source_path=[/riva_build_deploy/model.riva]'
 ```
 
-**Build RMIR from a `.nemo` checkpoint (copy exact inline block from pipeline-configuration page Notes section):**
+**Build RMIR from a `.nemo` checkpoint (use the matching custom-deployment example):**
 
 ```bash
-riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name-from-pipeline-page> \
+riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> \
   output_path=/riva_build_deploy/model.rmir \
-  'source_path=[{path: /riva_build_deploy/model.nemo, nemo2riva: {<flags-from-pipeline-page>}}]'
+  'source_path=[{path: /riva_build_deploy/model.nemo, nemo2riva: {<model-specific-conversion-options>}}]'
 ```
 
 **Launch the custom TTS NIM:**
@@ -270,12 +271,12 @@ Do not pick a base image from this skill's text alone — the catalog rotates pe
 - **`NIM_DISABLE_MODEL_DOWNLOAD=true` is required** — without it, the container ignores the custom model and downloads the default pre-trained model.
 - **`force=true` for `riva-build`, `-f` for `riva-deploy`** — `riva-build` rejects `-f` as unrecognized; pass `force=true` as a config parameter. `riva-deploy` accepts `-f`.
 - **Phase 3 runs on target GPU** — `riva-deploy` optimizes TensorRT engines for the deployment GPU; run it on the same GPU class you'll use in production.
-- **`.nemo` architecture support** — not all NeMo TTS architectures are supported by every NIM image. Check the **Notes section under each model** on the pipeline-configuration page for current architecture support and the exact inline-config keys.
+- **`.nemo` architecture support** — not all NeMo TTS architectures are supported by every NIM image. Check the custom-deployment page for a matching model example and verify the exact inline-config keys with the image-specific `riva-build ... -h` output.
 - **Voice names from custom NIM** — the voices exposed by a custom NIM depend on the trained model checkpoint. Always run `--list-voices` to discover the actual voice names rather than copying from documentation.
 
 ## Limitations
 
 - x86_64 architecture only — `riva-build` runs inside the NIM container
 - NVIDIA AI Enterprise license required for self-hosting
-- `.nemo` → RMIR conversion happens inside `riva-build` via the inline `nemo2riva` block; the set of supported NeMo architectures and the exact inline-config keys are version-locked per release — verify on the pipeline-configuration page (Notes sections) before converting
+- `.nemo` → RMIR conversion happens inside `riva-build` via the inline `nemo2riva` block; supported architectures and inline-config keys are version-locked per release — verify against the current custom-deployment page and the matching image's `riva-build ... -h` output before converting
 - Runtime-only customizations (zero-shot voice cloning, custom pronunciation dictionaries, SSML, `custom_configuration` keys) do not require a rebuild — see [`tts-pipelines.md`](tts-pipelines.md)

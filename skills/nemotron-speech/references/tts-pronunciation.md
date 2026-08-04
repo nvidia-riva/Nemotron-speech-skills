@@ -18,12 +18,13 @@ Discover and apply the correct pronunciation for a specific word or phrase in Ri
 
 | Question type | Fetch this page |
 |---|---|
-| IPA phone set for modern Riva TTS models, `<phoneme>` tag support per model | https://docs.nvidia.com/nim/speech/latest/tts/customization/customization.html |
-| `custom_dictionary` field format, `--phone_dictionary_file` riva-build parameter | https://docs.nvidia.com/nim/speech/latest/tts/customization/pipeline-configuration.html |
+| IPA phone set for current Riva TTS models | https://docs.nvidia.com/nim/speech/latest/tts/phoneme-support.html |
+| `<phoneme>` tag support and runtime custom-dictionary format | https://docs.nvidia.com/nim/speech/latest/tts/customization.html |
+| Build-time dictionary configuration and `riva-build` workflow | https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html |
 | gRPC proto contract — `SynthesizeSpeechRequest.custom_dictionary` field | https://docs.nvidia.com/nim/speech/latest/reference/api-references/tts/protos.html |
-| `--custom-dictionary` CLI flag format for talk.py | https://github.com/nvidia-riva/python-clients |
+| `--custom-dictionary` CLI flag format for `talk.py` | https://docs.nvidia.com/nim/speech/latest/tts/customization.html |
 
-**Do not infer from this skill's text:** which IPA phone symbols a specific model supports, whether SSML `<phoneme>` is supported for the deployed model, or whether `custom_dictionary` is accepted. The customization page is authoritative.
+**Do not infer from this skill's text:** which IPA phone symbols a specific model supports, whether SSML `<phoneme>` is supported for the deployed model, or whether `custom_dictionary` is accepted. Use the phoneme-support page for the IPA inventory and the customization page for request-time feature support.
 
 ---
 
@@ -52,7 +53,7 @@ Two key conventions:
 - `ˈ` marks primary stress on the following syllable; `ˌ` marks secondary stress. Omitting stress marks lets the model infer, but including them produces more consistent output.
 - `ʌ` and `ɚ` are not natively in modern models' phone sets — they are auto-converted to `ə` and `ɝ` respectively. Use `ə` and `ɝ` directly.
 
-For the authoritative phone inventory for the model you are using, fetch the customization page from the routing table above.
+For the authoritative phone inventory, fetch the phoneme-support page from the routing table above.
 
 ---
 
@@ -60,7 +61,7 @@ For the authoritative phone inventory for the model you are using, fetch the cus
 
 The agent produces 2–3 distinct IPA strings for the target word, labeled A, B, C. Each variant should differ in a meaningful and audible way — typically stress placement, initial or final vowel choice, or syllable reduction. Present them as a short table so the user can read the differences before listening.
 
-> **Agent instruction:** Generate variants using your linguistic knowledge. Do not use phone symbols that are absent from the model's phone set. Fetch the customization page if uncertain whether a specific symbol is supported for the deployed model.
+> **Agent instruction:** Generate variants using your linguistic knowledge. Do not use phone symbols that are absent from the model's phone set. Fetch the phoneme-support page if uncertain whether a specific symbol is supported.
 
 ---
 
@@ -268,7 +269,7 @@ python3 python-clients/scripts/tts/talk.py \
 
 If every request to a self-hosted NIM needs the same pronunciation overrides, bake the dictionary into the RMIR at build time using `--phone_dictionary_file <path>` in `riva-build`. This removes the need to pass `custom_dictionary` per-request but requires a full `riva-build` + `riva-deploy` cycle (see [`tts-custom.md`](tts-custom.md)).
 
-The `--phone_set` flag selected at `riva-build` time (`ipa` or `arpabet`) must match the phoneme alphabet used in the dictionary file. Fetch the pipeline-configuration page for the exact parameter name and accepted format for your model version.
+The phone set selected at `riva-build` time must match the phoneme alphabet used in the dictionary file. Fetch the custom-deployment page and confirm the exact parameter name and accepted format with the matching image's `riva-build ... -h` output.
 
 ---
 
@@ -276,13 +277,13 @@ The `--phone_set` flag selected at `riva-build` time (`ipa` or `arpabet`) must m
 
 - **Pronunciation unchanged despite `custom_dictionary`** — verify the double-space delimiter is present (not single space or tab); verify the model supports `custom_dictionary` for the deployed version by fetching the customization page; confirm the word spelling in the dictionary matches the exact spelling in the synthesis text (case-sensitive on some models).
 - **SSML `<phoneme>` tag silently ignored** — the model may not support SSML or may not support the `<phoneme>` tag specifically. Fetch the customization page and confirm SSML support for your model before debugging further.
-- **IPA character causes synthesis error or unexpected sound** — the IPA symbol may not be in the model's phone set, or a Unicode lookalike may have been substituted (e.g., Latin `ɛ` U+025B vs a visually similar character from another Unicode block). Copy IPA symbols from a verified source; check the customization page for the authoritative symbol list.
+- **IPA character causes synthesis error or unexpected sound** — the IPA symbol may not be in the model's phone set, or a Unicode lookalike may have been substituted (e.g., Latin `ɛ` U+025B vs a visually similar character from another Unicode block). Copy IPA symbols from a verified source; check the phoneme-support page for the authoritative symbol list.
 - **Multiple entries: last entry silently dropped** — check for spaces around the comma separator or a trailing comma. Correct format: `"WORD1  IPA1,WORD2  IPA2"` — no whitespace around commas, no trailing comma.
 - **Phone set mismatch at build time** — `--phone_set` in `riva-build` must match the alphabet used in `--phone_dictionary_file`. Mixing IPA strings into an ARPABET-configured model produces garbled or default-G2P output.
 
 ## Limitations
 
-- `custom_dictionary` and SSML `<phoneme>` support are per-model and per-release — always verify on the customization page
+- `custom_dictionary` and SSML `<phoneme>` support are per-model and per-release — verify feature support on the customization page and symbols on the phoneme-support page
 - IPA candidates are generated from the agent's linguistic knowledge; for high-stakes or unusual terms, cross-validate against a phonetic dictionary (e.g., CMU Pronouncing Dictionary) or a native-speaker reference recording
 - `custom_dictionary` applies per-request only; it does not persist across sessions unless included in every request or loaded from a session file
 - Build-time dictionary embedding requires `riva-build` + `riva-deploy`; see [`tts-custom.md`](tts-custom.md)

@@ -130,11 +130,13 @@ Top-level landing pages:
 | Prerequisites (driver / GPU / OS) | https://docs.nvidia.com/nim/speech/latest/get-started/prerequisites.html |
 | ASR pipeline configuration | https://docs.nvidia.com/nim/speech/latest/asr/customization/pipeline-configuration.html |
 | ASR runtime customization | https://docs.nvidia.com/nim/speech/latest/asr/customization/customization.html |
-| TTS pipeline configuration | https://docs.nvidia.com/nim/speech/latest/tts/customization/pipeline-configuration.html |
-| TTS runtime customization | https://docs.nvidia.com/nim/speech/latest/tts/customization/customization.html |
-| TTS IPA phone set and `<phoneme>` tag support per model | https://docs.nvidia.com/nim/speech/latest/tts/customization/customization.html |
+| TTS custom deployment (`.nemo` / `.riva`, `riva-build`, RMIR) | https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html |
+| TTS request-time customization (SSML, pronunciation dictionaries, `custom_configuration`) | https://docs.nvidia.com/nim/speech/latest/tts/customization.html |
+| TTS voices and emotional styles | https://docs.nvidia.com/nim/speech/latest/tts/voices.html |
+| TTS zero-shot voice cloning | https://docs.nvidia.com/nim/speech/latest/tts/voice-cloning.html |
+| TTS IPA phone set | https://docs.nvidia.com/nim/speech/latest/tts/phoneme-support.html |
 | Cloud function IDs (per model) | `https://build.nvidia.com/<org>/<model>/api` |
-| NGC catalog | https://catalog.ngc.nvidia.com/orgs/nim/teams/nvidia/models |
+| NGC model catalog | https://catalog.ngc.nvidia.com/models |
 
 ## Examples
 

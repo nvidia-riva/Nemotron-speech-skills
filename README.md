@@ -1,6 +1,6 @@
 # Nemotron Speech Skills
 
-A growing collection of skills and plugins for customizing, deploying, and operating **NVIDIA Nemotron Speech** (formerly [NVIDIA Riva](https://docs.nvidia.com/nim/riva/latest/index.html)) Speech NIMs with Claude Code, Codex, and compatible AI coding assistants.
+A growing collection of skills and plugins for customizing, deploying, and operating **[NVIDIA Nemotron Speech](https://docs.nvidia.com/nim/speech/latest/index.html)** (formerly NVIDIA Riva) Speech NIMs with Claude Code, Codex, and compatible AI coding assistants.
 
 > Disclaimer: AI coding assistants can accelerate setup, deployment, and
 > prototyping, but generated commands and code are development starting points.

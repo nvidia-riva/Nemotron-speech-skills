@@ -134,7 +134,7 @@
     "expected_behavior": [
       "Route to references/tts-custom.md before giving riva-build commands.",
       "Distinguish .nemo, .riva, RMIR, and deployed model repository artifacts for TTS.",
-      "Fetch the TTS support matrix and pipeline-configuration page to find the correct base container image and riva-build config-name for the model family.",
+      "Fetch the TTS support matrix and custom-deployment page, then confirm the riva-build config-name against the matching image's --help output.",
       "Use riva-build and riva-deploy terminology; do not rename commands to Nemotron.",
       "Include the readiness probe and --list-voices verification step after launching the custom TTS NIM."
     ]

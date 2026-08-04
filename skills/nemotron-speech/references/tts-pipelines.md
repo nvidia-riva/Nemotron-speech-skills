@@ -12,15 +12,18 @@ Configure TTS synthesis pipeline options: audio encoding, sample rate, offline v
 
 | Question type | Fetch this page |
 |---|---|
-| **Runtime feature support per model** — which `custom_configuration` keys exist, SSML tag support, emotional styles, zero-shot support | https://docs.nvidia.com/nim/speech/latest/tts/customization/customization.html |
-| **Full `riva-build` parameter list, defaults, build-time synthesis options** | https://docs.nvidia.com/nim/speech/latest/tts/customization/pipeline-configuration.html |
+| **Request-time customization** — SSML, custom dictionaries, and `custom_configuration` keys | https://docs.nvidia.com/nim/speech/latest/tts/customization.html |
+| **Voices and emotional styles** | https://docs.nvidia.com/nim/speech/latest/tts/voices.html |
+| **Zero-shot voice cloning** — supported models, prompt requirements, quality options | https://docs.nvidia.com/nim/speech/latest/tts/voice-cloning.html |
+| **Custom deployment and build-time synthesis options** | https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html |
 | **gRPC proto contract** — `SynthesizeSpeechRequest`, `ZeroShotData`, `custom_configuration` map | https://docs.nvidia.com/nim/speech/latest/reference/api-references/tts/protos.html |
+| **HTTP REST API** — offline and streaming synthesis request fields and response formats | https://docs.nvidia.com/nim/speech/latest/reference/api-references/tts/http-tts.html |
 | **Realtime WebSocket API** — OpenAI-realtime-compatible TTS sessions, event schemas | https://docs.nvidia.com/nim/speech/latest/reference/api-references/tts/realtime-tts.html |
 | Current model catalog, voice lists, supported languages, VRAM minimums | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/tts.html |
 | Latency / throughput benchmarks per model and GPU | https://docs.nvidia.com/nim/speech/latest/reference/performances/tts/performance.html |
 | **Get all build-time parameters from inside the container** | `riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> -h` |
 
-**Do not infer from this skill's text:** which `custom_configuration` keys a specific model supports, which SSML tags are available, what the current default sample rate is, or whether zero-shot voice cloning is supported for a given model. The customization page is authoritative.
+**Do not infer from this skill's text:** which `custom_configuration` keys a specific model supports, which SSML tags are available, what the current default sample rate is, or whether zero-shot voice cloning is supported for a given model. Use the topic-specific pages above and the live model configuration.
 
 ## Prerequisites
 
@@ -297,12 +300,12 @@ except Exception as e:
 
 ---
 
-**Requirements (verify on the customization page):**
+**Requirements (verify on the voice-cloning page):**
 - A 5–30 second clean audio clip of the target voice (WAV, mono, 16-bit PCM recommended)
 - The verbatim transcript of that audio clip
 - A model that passed the pre-flight check above
 
-**`quality` parameter:** integer 1–40 (default 20). Higher values improve voice similarity at the cost of synthesis latency. Fetch the customization page for per-model guidance on valid range and recommended starting point.
+**`quality` parameter:** integer 1–40 (default 20). Higher values improve voice similarity at the cost of synthesis latency. Fetch the voice-cloning page for per-model guidance on valid range and recommended starting point.
 
 **Inline quick path (gRPC):**
 
@@ -381,7 +384,7 @@ with wave.open("output.wav", "wb") as w:
 
 **Build-time (embedded into model repository):**
 
-Embedding a pronunciation dictionary at build time avoids passing it per-request, but requires re-running `riva-build` and `riva-deploy` (see [`tts-custom.md`](tts-custom.md)). The build-time parameter name and dictionary path format are per-model — fetch from the pipeline-configuration page.
+Embedding a pronunciation dictionary at build time avoids passing it per-request, but requires re-running `riva-build` and `riva-deploy` (see [`tts-custom.md`](tts-custom.md)). The build-time parameter name and dictionary path format are per-model — fetch the custom-deployment page and confirm with the image-specific `riva-build ... -h` output.
 
 ---
 
@@ -393,7 +396,7 @@ To see all configurable parameters for the version you're running, enter the NIM
 riva-build --config-path=pkg://servicemaker.configs.tts --config-name=<model-config-name> -h
 ```
 
-The `--config-name` value is per TTS model family — fetch or open the pipeline-configuration page to find the correct value for your model. The `--help` output is authoritative; defaults shown in this skill are illustrative and may differ per release.
+The `--config-name` value is per TTS model family — fetch or open the custom-deployment page and confirm it with the matching image's `--help` output. Defaults shown in this skill are illustrative and may differ per release.
 
 ---
 
@@ -437,8 +440,8 @@ python3 python-clients/scripts/tts/talk.py \
 
 **Lookup flow — agent question "does Magpie TTS support zero-shot voice cloning?":**
 
-1. Fetch or open the customization page
-2. Find the Magpie entry, check zero-shot support section
+1. Fetch or open the voice-cloning page
+2. Confirm that the deployed Magpie model is listed as zero-shot capable
 3. Answer from the fetched content
 
 Do not answer feature-support questions from this skill's text alone.
@@ -457,7 +460,7 @@ Do not answer feature-support questions from this skill's text alone.
 
 ## Limitations
 
-- `custom_configuration` keys, SSML tags, and zero-shot support are per-model and change per release — feature availability must be verified on the customization page
+- `custom_configuration` keys, SSML tags, and zero-shot support are per-model and change per release — verify request-time options on the customization page and zero-shot behavior on the voice-cloning page
 - Zero-shot voice cloning requires a model that supports it; not all TTS NIMs expose this capability
 - Build-time pronunciation dictionary embedding requires a full `riva-build` + `riva-deploy` cycle (see [`tts-custom.md`](tts-custom.md))
 - HTTP streaming (`/v1/audio/synthesize_online`) returns raw LPCM, not WAV — client-side wrapping with `sox` or equivalent is always required
