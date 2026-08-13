@@ -4,7 +4,7 @@ Two modes: **cloud-hosted** (no GPU, uses build.nvidia.com) or **self-hosted** (
 
 > **Agent:** When walking the user through a multi-step workflow, announce each step before presenting it: **Step N/M — Step Title** (e.g., "**Step 1/4 — Deploy the Container**").
 >
-> **Source of truth.** This skill describes deployment mechanics, which are stable across releases. For anything that varies per release — model catalog, container IDs, function IDs, voice lists, supported languages, feature support per model, VRAM minimums — **fetch or open the canonical doc page and answer from that, not from this skill's text.** See [Looking up current information](#looking-up-current-information) below.
+> **Source of truth.** Use [`speech-models.v1.json`](speech-models.v1.json) for cloud model IDs, function IDs, transport, and basic selection metadata. Use the canonical docs and runtime voice discovery for self-hosted details, full feature support, and VRAM.
 
 ---
 
@@ -19,7 +19,7 @@ This skill is **orientation, not catalog**. When a question depends on data that
 | Question type | Fetch this page |
 |---|---|
 | Current models, container IDs, `NIM_TAGS_SELECTOR` profiles, available voices, supported languages, VRAM minimums | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/tts.html |
-| Function IDs for cloud (build.nvidia.com) inference | `https://api.nvcf.nvidia.com/v2/nvcf/functions` (auth with `NVIDIA_API_KEY`; filter by `name` and `status=="ACTIVE"`). For human browsing only: `https://build.nvidia.com/<org>/<model>/api` (JS-rendered, not suitable for non-browser fetch tools). |
+| Cloud models, function IDs, transport, default language | Run `python3 ../scripts/model_catalog.py --remote resolve <stable-model-id>` from this directory; it validates the public [`speech-models.v1.json`](speech-models.v1.json) and falls back locally. |
 | **Request-time feature support per model** — SSML, custom dictionaries, `custom_configuration` keys | https://docs.nvidia.com/nim/speech/latest/tts/customization.html |
 | **Voices and emotional styles** | https://docs.nvidia.com/nim/speech/latest/tts/voices.html |
 | **gRPC proto contract** — `SynthesizeSpeechRequest`, `SynthesizeSpeechResponse`, voice metadata fields | https://docs.nvidia.com/nim/speech/latest/reference/api-references/tts/protos.html |
@@ -29,7 +29,7 @@ This skill is **orientation, not catalog**. When a question depends on data that
 
 **Do not infer from this skill's text:** which models exist, which voices they expose, which languages are supported, what `NIM_TAGS_SELECTOR` values are valid, or what VRAM is required. The docs are the contract.
 
-> **Naming caveat.** The same model can appear under different slugs across NVIDIA's catalogs: support-matrix label (e.g., "Magpie TTS Multilingual"), `CONTAINER_ID`, NVCF function name (`ai-magpie-tts-multilingual`), and build.nvidia.com URL slug. Do not assume they match — cross-reference each from its own catalog. The NVCF Functions API is the only catalog you can hit programmatically; use it to resolve function-ids at runtime rather than hardcoding.
+> **Naming caveat.** Use the stable catalog `id` as the downstream identifier and its `cloud` object for current NVCF routing; use the support matrix separately for self-hosted container identifiers.
 
 ---
 
@@ -45,7 +45,7 @@ Choose **Option A** (cloud) for quick testing without a GPU, or **Option B** (se
 
 ## Instructions
 
-For **cloud synthesis**: install `nvidia-riva-client`, set `NVIDIA_API_KEY`, fetch the model's function-id from its build.nvidia.com API page, and run `talk.py` against `grpc.nvcf.nvidia.com:443` with `--use-ssl`.
+For **cloud synthesis**: install `nvidia-riva-client`, set `NVIDIA_API_KEY`, resolve the stable model ID through `model_catalog.py`, and use the returned transport and endpoint.
 
 For **self-hosted**: fetch the current `CONTAINER_ID` and `NIM_TAGS_SELECTOR` from the support matrix, then follow Steps 1–4 below.
 
@@ -59,23 +59,14 @@ For **runtime feature questions** (voice list, SSML, streaming format): fetch or
 
 **Server:** `grpc.nvcf.nvidia.com:443` — always pass `--use-ssl`.
 
-**Function ID lookup (JSON, scriptable, no hardcoding):**
+**Function ID lookup (validated catalog with bundled fallback):**
 
 ```bash
-curl -fsS -H "Authorization: Bearer $NVIDIA_API_KEY" \
-  "https://api.nvcf.nvidia.com/v2/nvcf/functions?visibility=public,authorized" \
-  | python3 -c "
-import sys, json, re
-pat = re.compile(r'magpie|tts', re.I)
-for f in json.load(sys.stdin).get('functions', []):
-    if f.get('status') == 'ACTIVE' and pat.search(f.get('name','')):
-        print(f['id'], f['name'])
-"
+python3 ../scripts/model_catalog.py --remote --pretty resolve \
+  nvidia/magpie-tts-multilingual
 ```
 
-Pick the `id` of the function whose `name` matches your model.
-
-Function IDs and `versionId` rotate per release — never hardcode them; always resolve fresh via this API.
+Read `cloud.functionId`, `cloud.transport`, and the corresponding endpoint. Function IDs can rotate; keep the stable catalog model ID in configuration and resolve it rather than copying the current UUID into application code.
 
 For interactive browsing only: `https://build.nvidia.com/<org>/<model>/api`. That page is JS-rendered and not suitable for non-browser fetch tools.
 
