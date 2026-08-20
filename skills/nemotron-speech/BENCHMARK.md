@@ -1,79 +1,110 @@
-# Evaluation Report
+# Skill Benchmark: nemotron-speech
 
-Evaluation of the `nemotron-speech` skill before publication through NVSkills-Eval.
-
-This benchmark summarizes 3-Tier Evaluation from NVSkills-Eval results for the skill. The goal is to document whether the skill is safe, discoverable, effective, and useful for agents before it is published for broader workflow use.
-
-## Evaluation Summary
-
-- Skill: `nemotron-speech`
-- Evaluation date: 2026-06-24
-- NVSkills-Eval profile: `external`
-- Environment: `astra-sandbox`
-- Dataset: 18 evaluation tasks
-- Attempts per task: 1
-- Pass threshold: 50%
-- Overall verdict: PASS
-
-## Agents Used
-
-- `claude-code`
-- `codex`
-
-## Metrics Used
-
-Reported benchmark dimensions:
-
-- Security: checks whether skill-assisted execution avoids unsafe behavior such as secret leakage, destructive commands, or unauthorized access.
-- Correctness: checks whether the agent follows the expected workflow and produces the correct final output.
-- Discoverability: checks whether the agent loads the skill when relevant and avoids using it when irrelevant.
-- Effectiveness: checks whether the agent performs measurably better with the skill than without it.
-- Efficiency: checks whether the agent uses fewer tokens and avoids redundant work.
-
-Underlying evaluation signals used in this run:
-
-- `security` (Security): checks for unsafe operations, secret leakage, and unauthorized access.
-- `skill_execution` (Skill Execution): verifies that the agent loaded the expected skill and workflow.
-- `skill_efficiency` (Efficiency): checks routing quality, decoy avoidance, and redundant tool usage.
-- `accuracy` (Accuracy): grades final-answer correctness against the reference answer.
-- `goal_accuracy` (Goal Accuracy): checks whether the overall user task completed successfully.
-- `behavior_check` (Behavior Check): verifies expected behavior steps, including safety expectations.
-- `token_efficiency` (Token Efficiency): compares token usage with and without the skill.
-
-## Test Tasks
-
-The benchmark dataset contained 18 evaluation tasks:
-
-- Positive tasks: 14 tasks where the skill was expected to activate.
-- Negative tasks: 4 tasks where no skill was expected.
-- Unlabeled tasks: 0 tasks where positive/negative intent could not be inferred.
-
-Task composition is derived from the evaluation dataset when possible. Entries with `expected_skill` set are treated as positive skill-activation cases, while entries with `expected_skill: null` are treated as negative activation cases.
-
-## Results
-
-| Dimension | Num | `claude-code` | `codex` |
-|---|---:|---:|---:|
-| Security | 8 | 100% (+6%) | 92% (+14%) |
-| Correctness | 8 | 92% (+34%) | 86% (+16%) |
-| Discoverability | 8 | 99% (+62%) | 64% (+15%) |
-| Effectiveness | 8 | 81% (+24%) | 77% (+16%) |
-| Efficiency | 8 | 91% (+47%) | 53% (+8%) |
-
-Score values show skill-assisted performance. Values in parentheses show uplift versus the no-skill baseline when baseline data is available.
-
-## Tier 1: Static Validation Summary
-
-Tier 1 validation passed with observations. NVSkills-Eval ran 1 checks and found 1 total findings.
-
-Top findings:
-
-- LOW SCHEMA/author_format: Author must be of the form 'Name <email@host>' (`skills/nemotron-speech/SKILL.md`)
-
-## Tier 2: Deduplication Summary
-
-This tier was not run or did not produce findings in this report.
+> ✅ **Overall verdict: PASS — Recommended for publication**
 
 ## Publication Recommendation
 
-The skill is suitable to proceed toward NVSkills-Eval publication based on this benchmark. Skill owners should keep this file with the skill and refresh it when the evaluation dataset, skill behavior, or target agents materially change.
+Recommended for publication based on the completed evaluation evidence in this report.
+
+## Evaluation Metadata
+
+- Skill: `nemotron-speech`
+- Evaluation date: 2026-08-20
+- Evaluator version: `1.3.2`
+- Agents: Claude Code (`aws/anthropic/bedrock-claude-opus-4-8`), Codex (`openai/openai/gpt-5.5`)
+- Tasks: 18 evaluation tasks (14 positive, 4 negative)
+- Dataset digest: `sha256:7da18a129d0ad5efdc392d764333668f68f9acf996152684bc2464427afdb20f` (skill-evaluator-dataset-snapshot/1)
+- Attempts per task: 1
+- Environment: `local`
+- Tier 3 evidence: required for publication
+
+Tasks ran on the trusted local host; local mode is not sandboxed.
+
+## Execution and Provenance
+
+- Validation status: `passed`
+- Report generation: `complete`
+- Evaluator version: `1.3.2`
+- Git commit: `0117bc2e3e54da4244a656466526c5b1b5a559ea`
+- Content type: requested `auto`, detected `skill`
+- Container image: `gitlab-master.nvidia.com:5005/nvcarps/ci-group/nvcarps-ci/skillevaluator-ci:sha-0117bc2e3e54da4244a656466526c5b1b5a559ea`
+- Container image digest: `not recorded`
+- Tier 3: requested `true`, executed `true`, status `succeeded`
+
+## What This Report Answers
+
+The three-tier evaluation checks whether the skill:
+
+- is safe to use;
+- produces correct answers;
+- is discovered and activated when needed;
+- helps the agent complete the user's goal and expected workflow; and
+- avoids wasted skill and tool usage.
+
+## Results at a Glance
+
+| Measure | Claude Code (Baseline → Skill Uplift) | Codex (Baseline → Skill Uplift) |
+|---|---:|---:|
+| Overall | 69% → 92% (+23 points) | 63% → 84% (+22 points) |
+| Security | 94% → 89% (-6 points) | 72% → 81% (+8 points) |
+| Correctness | 87% → 96% (+9 points) | 83% → 92% (+9 points) |
+| Discoverability | 54% → 100% (+45 points) | 58% → 89% (+32 points) |
+| Effectiveness | 60% → 88% (+28 points) | 68% → 80% (+11 points) |
+| Efficiency | 48% → 88% (+39 points) | 32% → 79% (+48 points) |
+
+**How to read this table:** baseline is the same task attempted without the target skill. Uplift is `skill score - baseline score`, shown in percentage points.
+
+Example: `47% → 92% (+45 points)` means the skill-assisted run scored 92%, 45 percentage points above its 47% no-skill baseline.
+
+## Tier Status
+
+| Tier | Purpose | Status | Evidence |
+|---|---|---|---|
+| Tier 1 | Static validation | **PASSED WITH OBSERVATIONS** | 1 validator(s); 2 finding(s) |
+| Tier 2 | Semantic deduplication | **NOT RUN** | No result was recorded |
+| Tier 3 | Live agent evaluation | **PASS** | 2 agent(s); 18 task(s) |
+
+## Findings and Observations
+
+<details>
+<summary>Show detailed findings and successful checks</summary>
+
+- **MEDIUM** SCHEMA/frontmatter_field_placement: Root field 'version' is ignored; use 'metadata.version' (`skills/nemotron-speech/SKILL.md`)
+- **LOW** SCHEMA/author_format: Author must be of the form 'Name <email@host>' (`skills/nemotron-speech/SKILL.md`)
+
+</details>
+
+## Scoring Methodology
+
+<details>
+<summary>Show dimension definitions, source signals, and thresholds</summary>
+
+| Dimension | Question | Scored signals |
+|---|---|---|
+| Security | Is it safe to use? | `security` (100%) |
+| Correctness | Is the answer correct? | `accuracy` (100%) |
+| Discoverability | Was the right skill loaded when needed? | `skill_execution` (100%) |
+| Effectiveness | Did the skill help complete the task? | `goal_accuracy` (50%) + `behavior_check` (50%) |
+| Efficiency | Did it avoid wasted tool or skill usage? | `skill_efficiency` (100%) |
+
+- Dimension bands: PASS at 50% or above; NEUTRAL from 40% to below 50%; FAIL below 40%.
+- Overall Tier 3 lift: PASS at +5 points or more; FAIL at -10 points or less; values between those bands are NEUTRAL.
+- Overall verdict: PASS only when every configured dimension passes for at least one supported agent. Lift is reported as diagnostic evidence and does not override this gate.
+- The 50% attempt pass threshold is a separate per-task gate; it is not the dimension pass threshold.
+- Effectiveness is the equal-weight mean of goal completion (`goal_accuracy`) and expected workflow adherence (`behavior_check`).
+- Token efficiency is a separate report-only signal. It does not change a dimension score or the overall verdict.
+
+Signals present in this run:
+
+- `security` (Security): unsafe operations, secret leakage, and unauthorized access.
+- `skill_execution` (Skill Execution): whether the expected skill was found and executed.
+- `skill_efficiency` (Efficiency): routing quality, workspace-aware skill reads, and productive tool use.
+- `accuracy` (Accuracy): final-answer correctness against the reference answer.
+- `goal_accuracy` (Goal Accuracy): whether the user's goal was achieved.
+- `behavior_check` (Behavior Check): whether the expected workflow behavior was followed.
+
+</details>
+
+## Freshness
+
+Regenerate this benchmark when the skill, evaluation dataset, target agent/model, evaluator version, environment, or scoring policy changes.

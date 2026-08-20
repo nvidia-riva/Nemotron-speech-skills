@@ -9,73 +9,76 @@ NVIDIA <br>
 ### License/Terms of Use: <br>
 CC-BY-4.0 AND Apache 2.0 <br>
 ## Use Case: <br>
-Developers and engineers deploying, testing, and operating NVIDIA Nemotron Speech (Riva) NIMs for automatic speech recognition, text-to-speech, and neural machine translation workflows. <br>
+Developers and engineers deploying, testing, and operating NVIDIA Nemotron Speech (Riva) NIMs for speech-to-text, text-to-speech, and translation workflows on cloud-hosted or self-hosted infrastructure. <br>
 
 ### Deployment Geography for Use: <br>
 Global <br>
+
+## Requirements / Dependencies: <br>
+**Requires API Key or External Credential:** [Yes] <br>
+**Credential Type(s):** [API key] <br>
+
+Do not include secrets in prompts/logs/output; use least-privilege credentials; rotate keys as appropriate. <br>
 
 ## Known Risks and Mitigations: <br>
 Risk: Review before execution as proposals could introduce incorrect or misleading guidance into skills. <br>
 Mitigation: Review and scan skill before deployment. <br>
 
 ## Reference(s): <br>
-- [ASR Deployment & Inference](references/asr.md) <br>
-- [TTS Deployment & Inference](references/tts.md) <br>
-- [NMT Deployment & Inference](references/nmt.md) <br>
-- [Custom ASR Model Deployment](references/asr-custom.md) <br>
-- [Custom TTS Model Deployment](references/tts-custom.md) <br>
-- [TTS Pipeline Configuration](references/tts-pipelines.md) <br>
-- [TTS Pronunciation](references/tts-pronunciation.md) <br>
-- [ASR Pipeline Configuration](references/pipelines.md) <br>
-- [Model Selection Guide](references/model-selection.md) <br>
-- [Environment Setup](references/setup.md) <br>
-- [Deployment Readiness Checks](references/deployment-readiness-checks.md) <br>
-- [NVIDIA Speech NIM Documentation](https://docs.nvidia.com/nim/speech/latest/index.html) <br>
+- [ASR Support Matrix](https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html) <br>
+- [TTS Support Matrix](https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/tts.html) <br>
+- [NMT Support Matrix](https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/nmt.html) <br>
+- [Prerequisites (Driver / GPU / OS)](https://docs.nvidia.com/nim/speech/latest/get-started/prerequisites.html) <br>
+- [ASR Pipeline Configuration](https://docs.nvidia.com/nim/speech/latest/asr/customization/pipeline-configuration.html) <br>
+- [TTS Custom Deployment](https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html) <br>
+- [TTS Customization](https://docs.nvidia.com/nim/speech/latest/tts/customization.html) <br>
+- [TTS Voices and Emotional Styles](https://docs.nvidia.com/nim/speech/latest/tts/voices.html) <br>
+- [TTS Zero-Shot Voice Cloning](https://docs.nvidia.com/nim/speech/latest/tts/voice-cloning.html) <br>
 - [NGC Model Catalog](https://catalog.ngc.nvidia.com/models) <br>
 
 
 ## Skill Output: <br>
-**Output Type(s):** [Shell commands, Configuration instructions, Code, API Calls] <br>
-**Output Format:** [Markdown with inline bash and Python code blocks] <br>
+**Output Type(s):** [Shell commands, Configuration instructions, Code] <br>
+**Output Format:** [Markdown with inline bash code blocks] <br>
 **Output Parameters:** [1D] <br>
 **Other Properties Related to Output:** [None] <br>
 
 ## Evaluation Agents Used: <br>
-- Claude Code (`claude-code`) <br>
-- Codex (`codex`) <br>
+- Claude Code (`aws/anthropic/bedrock-claude-opus-4-8`) <br>
+- Codex (`openai/openai/gpt-5.5`) <br>
 
 
 
 ## Evaluation Tasks: <br>
-18 evaluation tasks (14 positive skill-activation, 4 negative) in astra-sandbox environment using NVSkills-Eval external profile. <br>
+18 evaluation tasks (14 positive, 4 negative) run locally with 1 attempt per task. <br>
 
 ## Evaluation Metrics Used: <br>
 Reported benchmark dimensions: <br>
-- Security: Checks whether skill-assisted execution avoids unsafe behavior such as secret leakage, destructive commands, or unauthorized access. <br>
-- Correctness: Checks whether the agent follows the expected workflow and produces the correct final output. <br>
-- Discoverability: Checks whether the agent loads the skill when relevant and avoids using it when irrelevant. <br>
-- Effectiveness: Checks whether the agent performs measurably better with the skill than without it. <br>
-- Efficiency: Checks whether the agent uses fewer tokens and avoids redundant work. <br>
+- Security: Whether the skill avoids unsafe operations, secret leakage, and unauthorized access. <br>
+- Correctness: Whether the final answer is correct against the reference answer. <br>
+- Discoverability: Whether the expected skill was found and executed when needed. <br>
+- Effectiveness: Whether the skill helps the agent complete the user's goal and follow the expected workflow. <br>
+- Efficiency: Whether the skill avoids wasted tool or skill usage. <br>
 
 Underlying evaluation signals used in this run: <br>
-- `security`: Checks for unsafe operations, secret leakage, and unauthorized access. <br>
-- `skill_execution`: Verifies that the agent loaded the expected skill and workflow. <br>
-- `skill_efficiency`: Checks routing quality, decoy avoidance, and redundant tool usage. <br>
-- `accuracy`: Grades final-answer correctness against the reference answer. <br>
-- `goal_accuracy`: Checks whether the overall user task completed successfully. <br>
-- `behavior_check`: Verifies expected behavior steps, including safety expectations. <br>
-- `token_efficiency`: Compares token usage with and without the skill. <br>
+- `security`: Unsafe operations, secret leakage, and unauthorized access. <br>
+- `skill_execution`: Whether the expected skill was found and executed. <br>
+- `skill_efficiency`: Routing quality, workspace-aware skill reads, and productive tool use. <br>
+- `accuracy`: Final-answer correctness against the reference answer. <br>
+- `goal_accuracy`: Whether the user's goal was achieved. <br>
+- `behavior_check`: Whether the expected workflow behavior was followed. <br>
 
 
 
 ## Evaluation Results: <br>
-| Dimension | Num | `claude-code` | `codex` |
-|---|---:|---:|---:|
-| Security | 8 | 100% (+6%) | 92% (+14%) |
-| Correctness | 8 | 92% (+34%) | 86% (+16%) |
-| Discoverability | 8 | 99% (+62%) | 64% (+15%) |
-| Effectiveness | 8 | 81% (+24%) | 77% (+16%) |
-| Efficiency | 8 | 91% (+47%) | 53% (+8%) |
+| Measure | Claude Code (Baseline → Skill Uplift) | Codex (Baseline → Skill Uplift) |
+|---|---:|---:|
+| Overall | 69% → 92% (+23 points) | 63% → 84% (+22 points) |
+| Security | 94% → 89% (-6 points) | 72% → 81% (+8 points) |
+| Correctness | 87% → 96% (+9 points) | 83% → 92% (+9 points) |
+| Discoverability | 54% → 100% (+45 points) | 58% → 89% (+32 points) |
+| Effectiveness | 60% → 88% (+28 points) | 68% → 80% (+11 points) |
+| Efficiency | 48% → 88% (+39 points) | 32% → 79% (+48 points) |
 
 ## Skill Version(s): <br>
 1.0.0 (source: frontmatter) <br>
