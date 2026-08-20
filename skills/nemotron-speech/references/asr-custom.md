@@ -79,7 +79,8 @@ export CONTAINER_ID=<base-NIM-image-matching-your-model-family>
 export NIM_EXPORT_PATH=~/nim_export
 export ARTIFACT_DIR=/path/to/artifacts         # directory containing your .riva file
 
-mkdir -p $NIM_EXPORT_PATH && sudo chown 1000:1000 $NIM_EXPORT_PATH
+mkdir -p $NIM_EXPORT_PATH
+sudo chown 1000:1000 $NIM_EXPORT_PATH
 
 ```
 

@@ -110,7 +110,8 @@ Fetch the current `CONTAINER_ID` and `NIM_TAGS_SELECTOR` for your chosen model f
 export CONTAINER_ID=<container-id-from-support-matrix>
 export NIM_TAGS_SELECTOR="<selector-from-support-matrix>"
 export LOCAL_NIM_CACHE=~/.cache/nim
-mkdir -p $LOCAL_NIM_CACHE && sudo chown 1000:1000 $LOCAL_NIM_CACHE
+mkdir -p $LOCAL_NIM_CACHE
+sudo chown 1000:1000 $LOCAL_NIM_CACHE
 
 docker run -it --rm --name=$CONTAINER_ID \
   --runtime=nvidia \

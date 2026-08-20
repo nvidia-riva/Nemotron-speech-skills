@@ -51,7 +51,8 @@ Fetch the current `CONTAINER_ID` from the support matrix.
 ```bash
 export CONTAINER_ID=<container-id-from-support-matrix>
 export LOCAL_NIM_CACHE=~/.cache/nim
-mkdir -p $LOCAL_NIM_CACHE && sudo chown 1000:1000 $LOCAL_NIM_CACHE
+mkdir -p $LOCAL_NIM_CACHE
+sudo chown 1000:1000 $LOCAL_NIM_CACHE
 
 docker run -it --rm --name=$CONTAINER_ID \
   --runtime=nvidia \
