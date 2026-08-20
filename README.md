@@ -45,6 +45,9 @@ The **`nemotron-speech`** skill covers Speech NIM deployment and operation. Its 
 | `references/asr-custom.md` | Deploy a custom NeMo-trained ASR model as a Riva NIM |
 | `references/pipelines.md` | Advanced ASR pipeline config: VAD, diarization, language models, chunk size |
 | `references/tts.md` | Deploy and run Riva TTS (text-to-speech) NIMs |
+| `references/tts-custom.md` | Deploy a custom or fine-tuned NeMo TTS model as a Riva NIM |
+| `references/tts-pipelines.md` | Advanced TTS synthesis config: SSML, zero-shot voice cloning, audio encoding, sample rate |
+| `references/tts-pronunciation.md` | Discover, test, and apply IPA pronunciations for specific words or phrases |
 | `references/nmt.md` | Deploy and run Riva NMT (neural machine translation) NIMs |
 
 ### `nemotron-asr-finetune`
