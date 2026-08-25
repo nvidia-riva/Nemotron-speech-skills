@@ -9,7 +9,7 @@ Recommended for publication based on the completed evaluation evidence in this r
 ## Evaluation Metadata
 
 - Skill: `nemotron-speech`
-- Evaluation date: 2026-08-20
+- Evaluation date: 2026-08-25
 - Evaluator version: `1.3.2`
 - Agents: Claude Code (`aws/anthropic/bedrock-claude-opus-4-8`), Codex (`openai/openai/gpt-5.5`)
 - Tasks: 18 evaluation tasks (14 positive, 4 negative)
@@ -45,12 +45,12 @@ The three-tier evaluation checks whether the skill:
 
 | Measure | Claude Code (Baseline → Skill Uplift) | Codex (Baseline → Skill Uplift) |
 |---|---:|---:|
-| Overall | 63% → 93% (+30 points) | 64% → 82% (+17 points) |
-| Security | 67% → 92% (+25 points) | 78% → 67% (-11 points) |
-| Correctness | 89% → 100% (+11 points) | 89% → 91% (+2 points) |
-| Discoverability | 57% → 100% (+43 points) | 57% → 88% (+31 points) |
-| Effectiveness | 58% → 85% (+27 points) | 64% → 83% (+19 points) |
-| Efficiency | 46% → 90% (+43 points) | 33% → 80% (+46 points) |
+| Overall | 66% → 92% (+26 points) | 62% → 84% (+23 points) |
+| Security | 89% → 97% (+8 points) | 69% → 78% (+8 points) |
+| Correctness | 82% → 91% (+9 points) | 88% → 94% (+7 points) |
+| Discoverability | 57% → 99% (+42 points) | 57% → 89% (+32 points) |
+| Effectiveness | 56% → 86% (+29 points) | 63% → 77% (+14 points) |
+| Efficiency | 45% → 88% (+43 points) | 32% → 83% (+52 points) |
 
 **How to read this table:** baseline is the same task attempted without the target skill. Uplift is `skill score - baseline score`, shown in percentage points.
 

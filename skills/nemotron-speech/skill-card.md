@@ -9,7 +9,7 @@ NVIDIA <br>
 ### License/Terms of Use: <br>
 CC-BY-4.0 AND Apache 2.0 <br>
 ## Use Case: <br>
-Developers and engineers deploying, testing, and operating NVIDIA Nemotron Speech (Riva) NIM services for speech-to-text, text-to-speech, and translation workflows. <br>
+Developers and engineers deploying, testing, and operating NVIDIA Nemotron Speech (Riva) NIMs for ASR, TTS, and NMT workflows via cloud-hosted or self-hosted infrastructure. <br>
 
 ### Deployment Geography for Use: <br>
 Global <br>
@@ -31,14 +31,17 @@ Mitigation: Review and scan skill before deployment. <br>
 - [Prerequisites (Driver / GPU / OS)](https://docs.nvidia.com/nim/speech/latest/get-started/prerequisites.html) <br>
 - [ASR Pipeline Configuration](https://docs.nvidia.com/nim/speech/latest/asr/customization/pipeline-configuration.html) <br>
 - [TTS Custom Deployment](https://docs.nvidia.com/nim/speech/latest/tts/custom-deployment.html) <br>
-- [TTS Customization](https://docs.nvidia.com/nim/speech/latest/tts/customization.html) <br>
+- [TTS Voices and Emotional Styles](https://docs.nvidia.com/nim/speech/latest/tts/voices.html) <br>
 - [TTS Zero-Shot Voice Cloning](https://docs.nvidia.com/nim/speech/latest/tts/voice-cloning.html) <br>
-- [Cloud Model Catalog](references/speech-models.v1.json) <br>
+- [NGC Model Catalog](https://catalog.ngc.nvidia.com/models) <br>
 - [Model Selection Guide](references/model-selection.md) <br>
+- [Speech Models Catalog (v1)](references/speech-models.v1.json) <br>
+- [Setup Guide](references/setup.md) <br>
+- [Deployment Readiness Checks](references/deployment-readiness-checks.md) <br>
 
 
 ## Skill Output: <br>
-**Output Type(s):** [Shell commands, Configuration instructions, API Calls, Code] <br>
+**Output Type(s):** [Shell commands, Configuration instructions, Code, API Calls] <br>
 **Output Format:** [Markdown with inline bash code blocks] <br>
 **Output Parameters:** [1D] <br>
 **Other Properties Related to Output:** [None] <br>
@@ -50,22 +53,22 @@ Mitigation: Review and scan skill before deployment. <br>
 
 
 ## Evaluation Tasks: <br>
-18 evaluation tasks (14 positive, 4 negative) evaluated against the nemotron-speech skill. <br>
+18 evaluation tasks (14 positive, 4 negative) from a versioned skill-evaluator dataset snapshot. <br>
 
 ## Evaluation Metrics Used: <br>
 Reported benchmark dimensions: <br>
-- Security: Checks whether the skill avoids unsafe operations, secret leakage, and unauthorized access. <br>
-- Correctness: Checks whether the final answer is correct against the reference answer. <br>
+- Security: Checks for unsafe operations, secret leakage, and unauthorized access. <br>
+- Correctness: Checks final-answer correctness against a reference answer. <br>
 - Discoverability: Checks whether the expected skill was found and executed when needed. <br>
-- Effectiveness: Checks whether the skill helps complete the user's goal and follows expected workflow behavior. <br>
+- Effectiveness: Checks whether the user’s goal was achieved and expected workflow behavior was followed. <br>
 - Efficiency: Checks routing quality, workspace-aware skill reads, and productive tool use. <br>
 
 Underlying evaluation signals used in this run: <br>
 - `security`: Detects unsafe operations, secret leakage, and unauthorized access. <br>
-- `skill_execution`: Verifies the expected skill was found and executed. <br>
-- `skill_efficiency`: Measures routing quality, workspace-aware skill reads, and productive tool use. <br>
-- `accuracy`: Verifies final-answer correctness against the reference answer. <br>
-- `goal_accuracy`: Verifies whether the user's goal was achieved. <br>
+- `skill_execution`: Verifies whether the expected skill was found and executed. <br>
+- `skill_efficiency`: Evaluates routing quality, workspace-aware skill reads, and productive tool use. <br>
+- `accuracy`: Measures final-answer correctness against the reference answer. <br>
+- `goal_accuracy`: Assesses whether the user’s goal was achieved. <br>
 - `behavior_check`: Verifies whether the expected workflow behavior was followed. <br>
 
 
@@ -73,12 +76,12 @@ Underlying evaluation signals used in this run: <br>
 ## Evaluation Results: <br>
 | Measure | Claude Code (Baseline → Skill) | Codex (Baseline → Skill) |
 |---|---:|---:|
-| Overall | 63% → 93% (+30 pts) | 64% → 82% (+17 pts) |
-| Security | 67% → 92% (+25 pts) | 78% → 67% (-11 pts) |
-| Correctness | 89% → 100% (+11 pts) | 89% → 91% (+2 pts) |
-| Discoverability | 57% → 100% (+43 pts) | 57% → 88% (+31 pts) |
-| Effectiveness | 58% → 85% (+27 pts) | 64% → 83% (+19 pts) |
-| Efficiency | 46% → 90% (+43 pts) | 33% → 80% (+46 pts) |
+| Overall | 66% → 92% (+26 pts) | 62% → 84% (+23 pts) |
+| Security | 89% → 97% (+8 pts) | 69% → 78% (+8 pts) |
+| Correctness | 82% → 91% (+9 pts) | 88% → 94% (+7 pts) |
+| Discoverability | 57% → 99% (+42 pts) | 57% → 89% (+32 pts) |
+| Effectiveness | 56% → 86% (+29 pts) | 63% → 77% (+14 pts) |
+| Efficiency | 45% → 88% (+43 pts) | 32% → 83% (+52 pts) |
 
 ## Skill Version(s): <br>
 1.0.0 (source: frontmatter) <br>
