@@ -9,11 +9,11 @@ Recommended for publication based on the completed evaluation evidence in this r
 ## Evaluation Metadata
 
 - Skill: `nemotron-speech`
-- Evaluation date: 2026-08-20
+- Evaluation date: 2026-08-25
 - Evaluator version: `1.3.2`
 - Agents: Claude Code (`aws/anthropic/bedrock-claude-opus-4-8`), Codex (`openai/openai/gpt-5.5`)
 - Tasks: 18 evaluation tasks (14 positive, 4 negative)
-- Dataset digest: `sha256:7da18a129d0ad5efdc392d764333668f68f9acf996152684bc2464427afdb20f` (skill-evaluator-dataset-snapshot/1)
+- Dataset digest: `sha256:355ccb73ec3d2f3468e511ec29d43333c1d049cab6b67de5faa3abcf79e1ff13` (skill-evaluator-dataset-snapshot/1)
 - Attempts per task: 1
 - Environment: `local`
 - Tier 3 evidence: required for publication
@@ -45,12 +45,12 @@ The three-tier evaluation checks whether the skill:
 
 | Measure | Claude Code (Baseline → Skill Uplift) | Codex (Baseline → Skill Uplift) |
 |---|---:|---:|
-| Overall | 69% → 92% (+23 points) | 63% → 84% (+22 points) |
-| Security | 94% → 89% (-6 points) | 72% → 81% (+8 points) |
-| Correctness | 87% → 96% (+9 points) | 83% → 92% (+9 points) |
-| Discoverability | 54% → 100% (+45 points) | 58% → 89% (+32 points) |
-| Effectiveness | 60% → 88% (+28 points) | 68% → 80% (+11 points) |
-| Efficiency | 48% → 88% (+39 points) | 32% → 79% (+48 points) |
+| Overall | 66% → 92% (+26 points) | 62% → 84% (+23 points) |
+| Security | 89% → 97% (+8 points) | 69% → 78% (+8 points) |
+| Correctness | 82% → 91% (+9 points) | 88% → 94% (+7 points) |
+| Discoverability | 57% → 99% (+42 points) | 57% → 89% (+32 points) |
+| Effectiveness | 56% → 86% (+29 points) | 63% → 77% (+14 points) |
+| Efficiency | 45% → 88% (+43 points) | 32% → 83% (+52 points) |
 
 **How to read this table:** baseline is the same task attempted without the target skill. Uplift is `skill score - baseline score`, shown in percentage points.
 

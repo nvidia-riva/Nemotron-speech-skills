@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "nvidia-nemotron-speech-cloud-models",
+  "updatedAt": "2026-08-25T00:00:00Z",
+  "defaults": {
+    "asr": {
+      "english": "nvidia/parakeet-ctc-1.1b-asr",
+      "englishOffline": "nvidia/parakeet-tdt-default",
+      "multilingual": "nvidia/parakeet-rnnt-multilingual",
+      "multilingualStreaming": "nvidia/parakeet-rnnt-multilingual",
+      "diarization": "nvidia/nemotron-asr-streaming"
+    },
+    "tts": {
+      "multilingual": "nvidia/magpie-tts-multilingual"
+    },
+    "nmt": {
+      "multilingual": "nvidia/riva-translate-1.6b"
+    }
+  },
+  "models": [
+    {
+      "id": "nvidia/parakeet-ctc-1.1b-asr",
+      "displayName": "Parakeet CTC 1.1B English",
+      "modality": "asr",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "english",
+        "languages": ["en-US"],
+        "modes": ["streaming", "offline"],
+        "wordTimestamps": true,
+        "diarization": false
+      },
+      "selection": {
+        "recommendedFor": ["English transcription", "word timestamps", "general-purpose ASR"],
+        "avoidFor": ["multilingual transcription", "built-in speaker diarization"]
+      },
+      "cloud": {
+        "functionName": "ai-parakeet-ctc-1_1b-asr",
+        "functionId": "1598d209-5e27-4d3c-8079-4751568b1081",
+        "transport": "http",
+        "baseUrl": "https://1598d209-5e27-4d3c-8079-4751568b1081.invocation.api.nvcf.nvidia.com",
+        "requestStyle": "openai-audio",
+        "defaultLanguage": "en-US"
+      }
+    },
+    {
+      "id": "nvidia/parakeet-tdt-default",
+      "displayName": "Parakeet TDT",
+      "modality": "asr",
+      "status": "transitioning",
+      "capabilities": {
+        "languageMode": "english",
+        "languages": ["en-US"],
+        "modes": ["offline"],
+        "sampleRatesHz": [16000],
+        "wordTimestamps": true,
+        "diarization": false
+      },
+      "selection": {
+        "recommendedFor": ["offline transcription", "word timestamps"],
+        "avoidFor": ["streaming transcription", "speaker diarization"],
+        "notes": ["This stable catalog ID will remain unchanged when NVIDIA replaces the current monolingual deployment with the multilingual profile."]
+      },
+      "cloud": {
+        "functionName": "ai-parakeet-tdt-0_6b-v2",
+        "functionId": "d3fe9151-442b-4204-a70d-5fcc597fd610",
+        "transport": "http",
+        "baseUrl": "https://d3fe9151-442b-4204-a70d-5fcc597fd610.invocation.api.nvcf.nvidia.com",
+        "requestStyle": "openai-audio",
+        "defaultLanguage": "en-US"
+      }
+    },
+    {
+      "id": "nvidia/parakeet-rnnt-multilingual",
+      "displayName": "Parakeet RNNT 1.1B Multilingual",
+      "modality": "asr",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "multilingual",
+        "languages": ["multi"],
+        "modes": ["streaming", "offline"],
+        "wordTimestamps": true,
+        "diarization": false
+      },
+      "selection": {
+        "recommendedFor": ["multilingual transcription", "language auto-detection", "multilingual streaming"],
+        "avoidFor": ["built-in speaker diarization"]
+      },
+      "cloud": {
+        "functionName": "ai-parakeet-1_1b-rnnt-multilingual-asr",
+        "functionId": "71203149-d3b7-4460-8231-1be2543a1fca",
+        "transport": "grpc",
+        "server": "grpc.nvcf.nvidia.com:443",
+        "rpcMode": "streaming",
+        "defaultLanguage": "multi"
+      }
+    },
+    {
+      "id": "nvidia/nemotron-asr-streaming",
+      "displayName": "Nemotron ASR Streaming",
+      "modality": "asr",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "english",
+        "languages": ["en-US"],
+        "modes": ["streaming"],
+        "wordTimestamps": true,
+        "diarization": true
+      },
+      "selection": {
+        "recommendedFor": ["low-latency English streaming", "speaker diarization", "client-driven end-of-utterance"],
+        "avoidFor": ["offline-only workflows", "multilingual transcription"]
+      },
+      "cloud": {
+        "functionName": "ai-nemotron-asr-streaming",
+        "functionId": "bb0837de-8c7b-481f-9ec8-ef5663e9c1fa",
+        "transport": "grpc",
+        "server": "grpc.nvcf.nvidia.com:443",
+        "rpcMode": "streaming",
+        "defaultLanguage": "en-US",
+        "realtime": {
+          "transport": "websocket",
+          "sessionUrl": "https://bb0837de-8c7b-481f-9ec8-ef5663e9c1fa.invocation.api.nvcf.nvidia.com/v1/realtime/transcription_sessions",
+          "websocketUrl": "wss://grpc.nvcf.nvidia.com:443/v1/realtime?intent=transcription",
+          "requestStyle": "nvcf-realtime-transcription"
+        }
+      }
+    },
+    {
+      "id": "nvidia/canary-1b-asr",
+      "displayName": "Canary 1B",
+      "modality": "asr",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "multilingual",
+        "languages": ["multi"],
+        "modes": ["offline"],
+        "wordTimestamps": false,
+        "diarization": false,
+        "translation": true
+      },
+      "selection": {
+        "recommendedFor": ["multilingual offline transcription", "speech translation"],
+        "avoidFor": ["streaming transcription", "word timestamps"]
+      },
+      "cloud": {
+        "functionName": "ai-canary-1b-asr",
+        "functionId": "b0e8b4a5-217c-40b7-9b96-17d84e666317",
+        "transport": "grpc",
+        "server": "grpc.nvcf.nvidia.com:443",
+        "rpcMode": "offline",
+        "defaultLanguage": "multi"
+      }
+    },
+    {
+      "id": "nvidia/whisper-large-v3",
+      "displayName": "Whisper Large v3",
+      "modality": "asr",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "multilingual",
+        "languages": ["multi"],
+        "modes": ["offline"],
+        "wordTimestamps": false,
+        "diarization": false,
+        "translation": true
+      },
+      "selection": {
+        "recommendedFor": ["broad language coverage", "offline transcription", "translate-to-English"],
+        "avoidFor": ["streaming transcription", "word timestamps"]
+      },
+      "cloud": {
+        "functionName": "ai-whisper-large-v3",
+        "functionId": "b702f636-f60c-4a3d-a6f4-f3568c13bd7d",
+        "transport": "grpc",
+        "server": "grpc.nvcf.nvidia.com:443",
+        "rpcMode": "offline",
+        "defaultLanguage": "multi"
+      }
+    },
+    {
+      "id": "nvidia/magpie-tts-multilingual",
+      "displayName": "Magpie TTS Multilingual",
+      "modality": "tts",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "multilingual",
+        "languages": ["multi"],
+        "modes": ["streaming", "offline"],
+        "voiceDiscovery": true
+      },
+      "selection": {
+        "recommendedFor": ["multilingual speech synthesis", "named production voices"],
+        "avoidFor": []
+      },
+      "cloud": {
+        "functionName": "ai-magpie-tts-multilingual",
+        "functionId": "877104f7-e885-42b9-8de8-f6e4c6303969",
+        "transport": "http",
+        "baseUrl": "https://877104f7-e885-42b9-8de8-f6e4c6303969.invocation.api.nvcf.nvidia.com",
+        "requestStyle": "riva-tts-http",
+        "defaultLanguage": "en-US"
+      }
+    },
+    {
+      "id": "nvidia/riva-translate-1.6b",
+      "displayName": "Riva Translate 1.6B",
+      "modality": "nmt",
+      "status": "active",
+      "capabilities": {
+        "languageMode": "multilingual",
+        "languages": ["multi"],
+        "modes": ["online"]
+      },
+      "selection": {
+        "recommendedFor": ["multilingual neural machine translation", "do-not-translate tags"],
+        "avoidFor": []
+      },
+      "cloud": {
+        "functionName": "ai-riva-translate-1_6b",
+        "functionId": "0778f2eb-b64d-45e7-acae-7dd9b9b35b4d",
+        "transport": "grpc",
+        "server": "grpc.nvcf.nvidia.com:443",
+        "rpcMode": "online"
+      }
+    }
+  ]
+}

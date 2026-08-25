@@ -107,6 +107,7 @@ Identify the user's task type, then load the corresponding reference file from `
 - Route setup requests for drivers, Docker, Container Toolkit, and NGC to [`references/setup.md`](references/setup.md).
 - Route GPU compatibility, deployment readiness, and container health checks to [`references/deployment-readiness-checks.md`](references/deployment-readiness-checks.md).
 - Route model choice across ASR, TTS, and NMT to [`references/model-selection.md`](references/model-selection.md).
+- For cloud model selection and endpoint resolution, query [`references/speech-models.v1.json`](references/speech-models.v1.json) through `scripts/model_catalog.py`; use the bundled copy when the public catalog is unavailable.
 - Route ASR deployment or inference for Parakeet, Canary, Whisper, and Nemotron ASR Streaming to [`references/asr.md`](references/asr.md).
 - Route custom-trained NeMo ASR deployment (`.nemo` → RMIR → NIM) to [`references/asr-custom.md`](references/asr-custom.md).
 - Route ASR pipeline configuration for VAD, diarization, language models, and chunk size to [`references/pipelines.md`](references/pipelines.md).
@@ -118,12 +119,13 @@ Identify the user's task type, then load the corresponding reference file from `
 
 ## Source of truth
 
-For per-release detail — current model catalog, container IDs, function IDs, voice lists, VRAM minimums, per-model feature support — **fetch or open the canonical NVIDIA doc** rather than relying on text in this SKILL.md or the references. Each reference file includes its own routing table to the relevant doc pages.
+For cloud routing, the versioned machine-readable catalog is the source for stable model IDs, current NVCF function IDs, transport, and selection metadata. Query it with `python3 scripts/model_catalog.py --remote recommend ...`; the helper validates remote data and falls back to the bundled copy. For self-hosted container IDs, voice lists, hardware requirements, and full per-model feature support, fetch the canonical NVIDIA docs.
 
 Top-level landing pages:
 
 | Topic | URL |
 |---|---|
+| Cloud model and endpoint catalog | [`references/speech-models.v1.json`](references/speech-models.v1.json) |
 | ASR support matrix | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html |
 | TTS support matrix | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/tts.html |
 | NMT support matrix | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/nmt.html |

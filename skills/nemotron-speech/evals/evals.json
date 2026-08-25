@@ -10,7 +10,7 @@
       "Load references/model-selection.md rather than jumping directly to a deployment recipe.",
       "Check whether NVIDIA_API_KEY or an existing local NIM is available when local context permits.",
       "Ask or reason about latency, accuracy, privacy, language, and deployment constraints.",
-      "Fetch or instruct verification against the current NVIDIA ASR support matrix before giving exact model IDs or function IDs."
+      "Use the validated speech-models.v1.json catalog for cloud model IDs, function IDs, and transport; use the ASR support matrix for self-hosted details."
     ]
   },
   {
@@ -51,7 +51,7 @@
       "Route to references/asr.md.",
       "Choose the cloud-hosted inference path and avoid self-hosted Docker steps.",
       "Require or check NVIDIA_API_KEY without exposing it.",
-      "Use build.nvidia.com or official NVIDIA docs to verify the current function ID and endpoint.",
+      "Resolve the stable Canary model ID through speech-models.v1.json and use the returned function ID and transport.",
       "Provide a Python client path appropriate for ASR cloud inference."
     ]
   },

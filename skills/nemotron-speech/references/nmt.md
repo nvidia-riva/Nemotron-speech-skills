@@ -2,7 +2,7 @@
 
 > **Agent:** When walking the user through a multi-step workflow, announce each step before presenting it: **Step N/M — Step Title** (e.g., "**Step 1/4 — Deploy the Container**").
 >
-> **Source of truth.** This skill describes deployment mechanics, which are stable across releases. For anything that varies per release — model catalog, container IDs, supported language pairs, feature support, VRAM minimums — **fetch or open the canonical doc page and answer from that, not from this skill's text.** See [Looking up current information](#looking-up-current-information) below.
+> **Source of truth.** Use [`speech-models.v1.json`](speech-models.v1.json) for cloud model IDs, function IDs, transport, and basic selection metadata. Use the canonical docs and runtime discovery for language pairs, self-hosted container IDs, full feature support, and VRAM.
 
 ## Purpose
 

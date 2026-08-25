@@ -41,6 +41,7 @@ The **`nemotron-speech`** skill covers Speech NIM deployment and operation. Its 
 | `references/setup.md` | Prerequisites: drivers, Docker, NVIDIA Container Toolkit, NGC API key, Riva Python client |
 | `references/deployment-readiness-checks.md` | System requirements checks, GPU compatibility, health checks, troubleshooting |
 | `references/model-selection.md` | Choose the right ASR / TTS / NMT model for your use case |
+| `references/speech-models.v1.json` | Versioned cloud model IDs, capabilities, and current NVCF routing |
 | `references/asr.md` | Deploy and run Riva ASR (speech-to-text) NIMs — cloud or self-hosted |
 | `references/asr-custom.md` | Deploy a custom NeMo-trained ASR model as a Riva NIM |
 | `references/pipelines.md` | Advanced ASR pipeline config: VAD, diarization, language models, chunk size |
@@ -49,6 +50,7 @@ The **`nemotron-speech`** skill covers Speech NIM deployment and operation. Its 
 | `references/tts-pipelines.md` | Advanced TTS synthesis config: SSML, zero-shot voice cloning, audio encoding, sample rate |
 | `references/tts-pronunciation.md` | Discover, test, and apply IPA pronunciations for specific words or phrases |
 | `references/nmt.md` | Deploy and run Riva NMT (neural machine translation) NIMs |
+| `scripts/model_catalog.py` | Validate, resolve, or recommend entries from the cloud model catalog |
 
 ### `nemotron-asr-finetune`
 

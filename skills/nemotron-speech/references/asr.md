@@ -2,7 +2,7 @@
 
 > **Agent:** When walking the user through a multi-step workflow, announce each step before presenting it: **Step N/M — Step Title** (e.g., "**Step 1/4 — Set Model Variables**").
 >
-> **Source of truth.** This skill describes deployment mechanics, which are stable across releases. For anything that varies per release — model catalog, container IDs, function IDs, feature support per model, VRAM minimums, performance numbers — **fetch or open the canonical doc page and answer from that, not from this skill's text.** See [Looking up current information](#looking-up-current-information) below.
+> **Source of truth.** Use [`speech-models.v1.json`](speech-models.v1.json) for cloud model IDs, function IDs, transport, and basic selection metadata. Use the canonical docs for self-hosted container IDs, full feature support, VRAM, and performance.
 
 ---
 
@@ -17,7 +17,8 @@ This skill is **orientation, not catalog**. When a question depends on data that
 | Question type | Fetch this page |
 |---|---|
 | Current models, container IDs, `NIM_TAGS_SELECTOR` profiles, VRAM minimums, supported GPUs | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html |
-| Function IDs for cloud (build.nvidia.com) inference | `https://api.nvcf.nvidia.com/v2/nvcf/functions` (auth with `NVIDIA_API_KEY`; filter by `name` and `status=="ACTIVE"`). For human browsing only: `https://build.nvidia.com/<org>/<model>/api` (JS-rendered, not suitable for non-browser fetch tools). |
+| Cloud models, function IDs, transport, default language | Run `python3 ../scripts/model_catalog.py --remote resolve <stable-model-id>` from this directory; it validates the public [`speech-models.v1.json`](speech-models.v1.json) and falls back locally. |
+| Verify active cloud functions directly | `https://api.nvcf.nvidia.com/v2/nvcf/functions` (auth with `NVIDIA_API_KEY`; filter by `name` and `status=="ACTIVE"`). |
 | **Runtime feature support per model** — word/token/phrase boosting, ITN / verbatim, profanity filter, force_eou, speaker diarization, word timestamps, `--show-intermediate`, `--stop_history`, `is_final`, `runtime_config` keys, `custom_configuration` keys | https://docs.nvidia.com/nim/speech/latest/asr/customization/customization.html |
 | **gRPC proto contract** — `StreamingRecognizeRequest`, `runtime_config` map, `RecognitionConfig`, response shapes | https://docs.nvidia.com/nim/speech/latest/reference/api-references/asr/protos.html |
 | **Realtime WebSocket API** — OpenAI-realtime-compatible sessions, AudioCodes telephony | https://docs.nvidia.com/nim/speech/latest/reference/api-references/asr/realtime-asr.html |
@@ -27,7 +28,7 @@ This skill is **orientation, not catalog**. When a question depends on data that
 
 **Do not infer from this skill's text:** which models exist, which features they support, what `NIM_TAGS_SELECTOR` values are valid, which gRPC fields the server honors, or what VRAM is required. The docs are the contract.
 
-> **Naming caveat.** The same model can appear under different slugs across NVIDIA's catalogs: support-matrix label (e.g., "Parakeet 1.1b CTC English"), `CONTAINER_ID` (`parakeet-1-1b-ctc-en-us`), NVCF function name (`ai-parakeet-ctc-1_1b-asr`), and build.nvidia.com URL slug (`parakeet-ctc-1-1b-en-us`). Do not assume they match — cross-reference each from its own catalog. The NVCF Functions API is the only catalog you can hit programmatically; use it to resolve function-ids at runtime rather than hardcoding.
+> **Naming caveat.** Use the stable catalog `id` as the downstream identifier and its `cloud` object for current NVCF routing; use the support matrix separately for self-hosted container identifiers.
 
 ---
 
@@ -52,7 +53,13 @@ Choose **Option A** (cloud) for quick testing without a GPU, or **Option B** (se
 
 ## Instructions
 
-For **cloud inference**: install `nvidia-riva-client`, set `NVIDIA_API_KEY`, and fetch the model's function ID from its build.nvidia.com API page. Try the gRPC recipe first against `grpc.nvcf.nvidia.com:443` with `--use-ssl`. If that cloud NIM does not expose gRPC or the gRPC call fails because the endpoint is unavailable, switch to the HTTP endpoint shown on the current build.nvidia.com page for that model.
+For **cloud inference**: install `nvidia-riva-client`, set `NVIDIA_API_KEY`, and resolve the model through `model_catalog.py`. Use the returned transport and endpoint; do not assume every cloud NIM exposes gRPC.
+
+When a resolved model includes `cloud.realtime`, clients may use the hosted
+realtime transcription flow without a protobuf dependency: create an ephemeral
+session at `sessionUrl`, then connect to `websocketUrl` with the returned
+session token. Keep the top-level gRPC fields available for clients that use the
+Riva streaming RPC.
 
 For **self-hosted**: fetch the current `CONTAINER_ID` and `NIM_TAGS_SELECTOR` from the support matrix, mount a container-writable model cache directory, then follow Steps 1–4 in Option B below.
 
@@ -66,23 +73,14 @@ For **runtime feature questions** (word boosting, force_eou, ITN, diarization, e
 
 **Server:** For cloud-hosted NVCF, start with `grpc.nvcf.nvidia.com:443` and always pass `--use-ssl`. If gRPC is not exposed for that cloud NIM, switch to the HTTP endpoint shown on the model's current build.nvidia.com page.
 
-**Function ID lookup (JSON, scriptable, no hardcoding):**
+**Function ID lookup (validated catalog with bundled fallback):**
 
 ```bash
-curl -fsS -H "Authorization: Bearer $NVIDIA_API_KEY" \
-  "https://api.nvcf.nvidia.com/v2/nvcf/functions?visibility=public,authorized" \
-  | python3 -c "
-import sys, json, re
-pat = re.compile(r'parakeet|canary|whisper|nemotron-asr', re.I)
-for f in json.load(sys.stdin).get('functions', []):
-    if f.get('status') == 'ACTIVE' and pat.search(f.get('name','')):
-        print(f['id'], f['name'])
-"
+python3 ../scripts/model_catalog.py --remote --pretty recommend \
+  --modality asr --language en-US --mode streaming
 ```
 
-Pick the `id` of the function whose `name` matches your model.
-
-Function IDs and `versionId` rotate per release — never hardcode them; always resolve fresh via this API.
+Read `cloud.functionId`, `cloud.transport`, and the corresponding endpoint. Function IDs can rotate; keep the stable catalog model ID in configuration and resolve it rather than copying the current UUID into application code.
 
 For interactive browsing only: `https://build.nvidia.com/<org>/<model>/api`. That page is JS-rendered and not suitable for non-browser fetch tools.
 

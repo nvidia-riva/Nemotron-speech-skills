@@ -2,12 +2,13 @@
 
 > **Agent:** This is the entry point for any Riva task. Walk through the **Procedure** below before opening the relevant modality reference — environment context changes what's possible (some boxes have no GPU; some have a key for one path and not the other; some already have a NIM running). The modality references ([`asr.md`](asr.md) / [`tts.md`](tts.md) / [`nmt.md`](nmt.md)) expect you to arrive with `SERVER`, `FID` (if cloud), and the model name already resolved.
 >
-> **Source of truth.** Model catalog, container IDs, supported languages, voice lists, and VRAM requirements **change with every Riva release**. This skill provides routing logic and a stable family taxonomy — the docs are the contract for what exists *right now*. Always **fetch or open the support matrix** before recommending a specific model name.
+> **Source of truth.** For cloud-hosted models, use [`speech-models.v1.json`](speech-models.v1.json) for stable model IDs, current function IDs, transport, and selection metadata. For self-hosted container IDs, detailed language/voice support, and VRAM requirements, use the current support matrix.
 
 ## Looking up current information
 
 | Question type | Fetch this page |
 |---|---|
+| **Cloud model choice, function ID, and transport** | Run `python ../scripts/model_catalog.py --remote recommend ...` from this directory, or read [`speech-models.v1.json`](speech-models.v1.json). The helper validates the remote catalog and falls back to its bundled copy. |
 | **Current ASR models, container IDs, supported languages, VRAM** | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/asr.html |
 | **Current TTS models, voice lists, supported languages, VRAM** | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/tts.html |
 | **Current NMT models, language pairs, VRAM** | https://docs.nvidia.com/nim/speech/latest/reference/support-matrix/nmt.html |
@@ -18,9 +19,23 @@
 | **ASR performance benchmarks** (latency, throughput, RTFX per GPU) | https://docs.nvidia.com/nim/speech/latest/reference/performances/asr/performance.html |
 | **TTS performance benchmarks** | https://docs.nvidia.com/nim/speech/latest/reference/performances/tts/performance.html |
 | **NMT performance benchmarks** | https://docs.nvidia.com/nim/speech/latest/reference/performances/nmt/performance.html |
-| **Active cloud functions** (function-ids for build.nvidia.com / NVCF inference) | `https://api.nvcf.nvidia.com/v2/nvcf/functions` (auth with `$NVIDIA_API_KEY`; filter by `name` and `status=="ACTIVE"`) |
+| **Verify active cloud functions directly** | `https://api.nvcf.nvidia.com/v2/nvcf/functions` (auth with `$NVIDIA_API_KEY`; filter by `name` and `status=="ACTIVE"`) |
 
-**Do not infer model names, container IDs, or feature support from this skill's text.** Use the family taxonomy below as a starting point, then fetch the support matrix to find the specific model and its `CONTAINER_ID` / `NIM_TAGS_SELECTOR`.
+**Do not copy function IDs into application code.** Consumers should resolve the stable catalog model ID at runtime and retain a validated bundled fallback. Use the support matrix to find self-hosted `CONTAINER_ID` / `NIM_TAGS_SELECTOR` values and confirm detailed feature support.
+
+### Querying the cloud catalog
+
+Run global options before the subcommand:
+
+```bash
+python3 ../scripts/model_catalog.py --remote --pretty recommend \
+  --modality asr --language en-GB --mode offline --word-timestamps
+
+python3 ../scripts/model_catalog.py --remote --pretty resolve \
+  nvidia/parakeet-tdt-default
+```
+
+Use the returned `cloud.transport` exactly. Do not send an HTTP request to a gRPC-only entry or vice versa. A catalog model ID such as `nvidia/parakeet-tdt-default` remains stable when its hosted function changes; NVIDIA updates the catalog entry instead of requiring downstream code changes.
 
 ## Purpose
 
@@ -37,7 +52,7 @@ Main entry point for any Riva Speech NIM task. Encodes four concerns in one skil
 
 ### Default — `NVIDIA_API_KEY` is set → cloud, zero friction
 
-If the user's environment has `NVIDIA_API_KEY` exported, the path is decided. Open the relevant modality reference ([`asr.md`](asr.md) / [`tts.md`](tts.md) / [`nmt.md`](nmt.md)) with `SERVER=grpc.nvcf.nvidia.com:443`; that file shows how to discover the function-id — then follow the Quick path heredoc there.
+If the user's environment has `NVIDIA_API_KEY` exported, the path is decided. Resolve the requested capabilities through the catalog helper, then open the relevant modality reference ([`asr.md`](asr.md) / [`tts.md`](tts.md) / [`nmt.md`](nmt.md)) with the returned function ID, transport, endpoint, and default language.
 
 **No GPU detection, no `docker ps`, no privacy interrogation, no Docker checks** — these add friction without value when cloud is wired up. The user explicitly opted into cloud by setting the key.
 
@@ -109,7 +124,7 @@ If the input *looks* sensitive (PII, health records, internal-confidential conte
 ### Routing values handoff (any path)
 
 Once a path is committed:
-- **Cloud:** the modality reference shows how to discover the NVCF function-id via the curl one-liner in its Quick path; you don't need to pre-resolve it.
+- **Cloud:** pass the catalog entry's function ID, transport, endpoint, and default language to the modality reference. If authenticated verification is needed, compare it with the NVCF Functions API.
 - **Local (running NIM):** pass `SERVER=0.0.0.0:50051` when opening the relevant modality reference.
 - **Local (fresh deploy):** follow the modality reference's Step 1 deploy with `CONTAINER_ID` + `NIM_TAGS_SELECTOR` from the support matrix.
 
