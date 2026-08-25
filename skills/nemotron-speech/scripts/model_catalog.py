@@ -24,6 +24,9 @@ LOCAL_CATALOG = Path(__file__).resolve().parent.parent / "references" / "speech-
 ALLOWED_MODALITIES = {"asr", "tts", "nmt"}
 ALLOWED_STATUSES = {"active", "transitioning", "deprecated"}
 ALLOWED_TRANSPORTS = {"http", "grpc"}
+NVCF_REALTIME_WEBSOCKET_URL = (
+    "wss://grpc.nvcf.nvidia.com:443/v1/realtime?intent=transcription"
+)
 
 
 class CatalogError(ValueError):
@@ -86,6 +89,22 @@ def validate_catalog(catalog: Any) -> dict[str, Any]:
                 raise CatalogError(f"{path}.cloud.baseUrl must match its NVCF function ID")
         elif cloud.get("server") != "grpc.nvcf.nvidia.com:443":
             raise CatalogError(f"{path}.cloud.server must be grpc.nvcf.nvidia.com:443")
+        realtime = cloud.get("realtime")
+        if realtime is not None:
+            expected_session_url = (
+                f"https://{function_id}.invocation.api.nvcf.nvidia.com"
+                "/v1/realtime/transcription_sessions"
+            )
+            if (
+                model.get("modality") != "asr"
+                or cloud.get("transport") != "grpc"
+                or not isinstance(realtime, dict)
+                or realtime.get("transport") != "websocket"
+                or realtime.get("sessionUrl") != expected_session_url
+                or realtime.get("websocketUrl") != NVCF_REALTIME_WEBSOCKET_URL
+                or realtime.get("requestStyle") != "nvcf-realtime-transcription"
+            ):
+                raise CatalogError(f"{path}.cloud.realtime is invalid")
 
     for modality, choices in catalog["defaults"].items():
         if modality not in ALLOWED_MODALITIES or not isinstance(choices, dict):

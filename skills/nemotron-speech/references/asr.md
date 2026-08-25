@@ -55,6 +55,12 @@ Choose **Option A** (cloud) for quick testing without a GPU, or **Option B** (se
 
 For **cloud inference**: install `nvidia-riva-client`, set `NVIDIA_API_KEY`, and resolve the model through `model_catalog.py`. Use the returned transport and endpoint; do not assume every cloud NIM exposes gRPC.
 
+When a resolved model includes `cloud.realtime`, clients may use the hosted
+realtime transcription flow without a protobuf dependency: create an ephemeral
+session at `sessionUrl`, then connect to `websocketUrl` with the returned
+session token. Keep the top-level gRPC fields available for clients that use the
+Riva streaming RPC.
+
 For **self-hosted**: fetch the current `CONTAINER_ID` and `NIM_TAGS_SELECTOR` from the support matrix, mount a container-writable model cache directory, then follow Steps 1–4 in Option B below.
 
 For **runtime feature questions** (word boosting, force_eou, ITN, diarization, etc.): fetch or open the customization page from the routing table above before answering — feature support is per-model and changes per release.

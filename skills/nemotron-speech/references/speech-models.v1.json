@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "catalogId": "nvidia-nemotron-speech-cloud-models",
-  "updatedAt": "2026-08-13T00:00:00Z",
+  "updatedAt": "2026-08-25T00:00:00Z",
   "defaults": {
     "asr": {
       "english": "nvidia/parakeet-ctc-1.1b-asr",
@@ -117,7 +117,13 @@
         "transport": "grpc",
         "server": "grpc.nvcf.nvidia.com:443",
         "rpcMode": "streaming",
-        "defaultLanguage": "en-US"
+        "defaultLanguage": "en-US",
+        "realtime": {
+          "transport": "websocket",
+          "sessionUrl": "https://bb0837de-8c7b-481f-9ec8-ef5663e9c1fa.invocation.api.nvcf.nvidia.com/v1/realtime/transcription_sessions",
+          "websocketUrl": "wss://grpc.nvcf.nvidia.com:443/v1/realtime?intent=transcription",
+          "requestStyle": "nvcf-realtime-transcription"
+        }
       }
     },
     {
