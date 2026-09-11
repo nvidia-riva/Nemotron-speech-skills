@@ -14,6 +14,23 @@ skill `nemotron-asr-finetune`.
      (last resort) from scratch — and escalate only when the target is missed. **Hard floor:** below ~10 hours of
      real transcribed target-domain audio, do not recommend fine-tuning at all — catastrophic forgetting and
      overfitting risk are both severe at that volume — recommend word boosting instead.
+     - **Word boosting has a NeMo pilot and a Riva deploy realization** — different artifacts with different,
+       non-interchangeable score systems. Pilot: GPU-PB context biasing via the `boosting_tree` config
+       (CTC: `ctc_decoding.*.boosting_tree`; RNN-T/TDT: `rnnt_decoding.*.boosting_tree`, both through
+       `speech_to_text_eval.py`, weighted by `boosting_tree_alpha`) — owned by `nemo-speech-asr-finetune`, entirely
+       self-contained, no Riva required. Deploy: Riva's per-request `boosted_lm_score` — owned by `nemotron-speech`.
+       Do not conflate the two score systems, and do not force a customer working the NeMo pilot to also touch
+       Riva.
+     - **The n-gram LM also has a NeMo pilot (NGPU-LM) and a Riva deploy realization, but carry-over to Riva is
+       architecture-dependent, not a blanket rule.** Pilot: build with `train_kenlm.py` (`save_nemo=True`), score
+       via `speech_to_text_eval.py`'s `ctc_decoding.*.ngram_lm_model`/`rnnt_decoding.*.ngram_lm_model` — CTC also
+       has a second, older NeMo-side mechanism (its own Flashlight decoder, word-level KenLM + lexicon).
+       **Deploy — CTC needs a rebuild** into a word-level LM for Riva's Flashlight decoder. **Deploy — RNN-T/TDT
+       reuses the pilot `.nemo` artifact unchanged** — verified against NVIDIA's own RNNT tutorial. Exact
+       `riva-build` flags/syntax for either case are owned by `nemotron-speech` (`references/pipelines.md`) — the
+       orchestrator should state the routing/carry-over fact and defer to that skill for flags, not recite them
+       from its own memory. Do not apply the CTC rebuild rule to RNNT, and do not assume the RNNT exception
+       applies to CTC.
   3. **Delegate to sub-skills** — data (`data-designer` for synthetic **text**; TTS audio via `nemotron-speech` if
      needed), training (`nemo-speech-asr-finetune`), evaluation (`nemo-speech-asr-finetune`'s eval stage), deployment
      (`nemotron-speech`). The remaining placeholder is `asr-data-profiling` (name it as such with interim guidance). Do
@@ -58,8 +75,13 @@ skill `nemotron-asr-finetune`.
   stale checkout instead of pulling latest main or checking the provided one); silently accepting a provided
   checkout without recommending latest main and asking the user; or, once the user has explicitly chosen to keep a
   provided checkout, second-guessing that choice / pulling latest main anyway without a concrete version issue
-  having actually surfaced; or assuming `nemo-speech-asr-finetune` is invocable at Stage 5 without first making it
-  discoverable and changing the working context into its NeMo checkout.
+  having actually surfaced; assuming `nemo-speech-asr-finetune` is invocable at Stage 5 without first making it
+  discoverable and changing the working context into its NeMo checkout; for a NeMo-only word-boosting request,
+  routing to `nemotron-speech`/Riva instead of the NeMo pilot, or presenting NeMo's `context_score`/
+  `boosting_tree_alpha` as if it were Riva's `boosted_lm_score` (or vice versa); or, for the n-gram LM, applying a
+  single blanket rule across CTC and RNNT instead of checking which architecture applies — e.g. telling an RNNT
+  user to rebuild a word-level KenLM/`decoding_vocab` they don't need, or telling a CTC user their pilot artifact
+  ships to Riva unchanged when it doesn't.
 - Positive cases should load `SKILL.md` and the relevant reference (`workflow.md`, `path-selection.md`,
   `sub-skills.md`, or `planning-answers.md`). `scripts/main.py` is harness-only.
 - Negative cases stay silent for pure export/deployment of an existing model (defer to `nemotron-speech`), OpenAI

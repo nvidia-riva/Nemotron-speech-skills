@@ -42,16 +42,21 @@ then announce steps for *that* branch (the "Step N/8" count only applies to the 
 
 | Chosen rung | Flow | Owner(s) | Eval surface |
 |---|---|---|---|
-| **Word boosting** | runtime word list → serve (no build) | `nemotron-speech` | served-endpoint WER |
+| **Word boosting — pilot (NeMo)** | GPU-PB `boosting_tree` decode-time eval; **no deploy** | `nemo-speech-asr-finetune` | offline file WER |
+| **Word boosting — deploy (Riva)** | runtime word list → serve (no build) | `nemotron-speech` | served-endpoint WER |
 | **Custom vocab / pronunciation** | `riva-build` vocab/lexicon → serve | `nemotron-speech` | served-endpoint WER |
-| **N-gram LM — pilot (NeMo)** | build KenLM → `beam_batch` greedy-vs-LM eval; **no deploy** | `nemo-speech-asr-finetune` | offline file WER |
-| **N-gram LM — deploy (Riva)** | build word-level KenLM+vocab → `riva-build` flashlight → serve | `nemotron-speech` | served-endpoint WER |
+| **N-gram LM — pilot (NeMo)** | build KenLM → NGPU-LM shallow-fusion eval; **no deploy** | `nemo-speech-asr-finetune` | offline file WER |
+| **N-gram LM — deploy (Riva)** | CTC: rebuild word-level LM → serve. RNNT: reuse pilot `.nemo` directly → serve (exact flags in `pipelines.md`) | `nemotron-speech` | served-endpoint WER |
 | **Fine-tune / from-scratch** | full Stages 4–8 | Data → `nemo-speech-asr-finetune` → `nemotron-speech` | offline WER (train) **and** served WER (post-deploy) |
 
-Key consequences: the **n-gram LM does not follow `train(NeMo) → eval(NeMo) → deploy(Riva)`** — its pilot and deploy
-realizations are different artifacts (see [`path-selection.md`](path-selection.md)); if the user wants to ship, route
-straight to `nemotron-speech` and build the Riva-format LM there, optionally after a NeMo pilot. Anything **served** is
-evaluated on the running NIM (**served-endpoint WER**, owned by `nemotron-speech`), not via the offline NeMo eval.
+Key consequences: **neither word boosting nor the n-gram LM follows `train(NeMo) → eval(NeMo) → deploy(Riva)`** —
+each has pilot and deploy realizations, and whether the pilot artifact carries into Riva unchanged is **not a
+blanket rule** (see [`path-selection.md`](path-selection.md)): word boosting never carries over (different score
+systems entirely); the n-gram LM depends on architecture — CTC needs a rebuild, RNNT reuses the pilot `.nemo`
+verbatim. A customer working a NeMo pilot only never needs to touch Riva — it is a complete, self-contained loop. If
+the user wants to ship, route straight to `nemotron-speech` and build (or reuse, for RNNT LM) the Riva-side artifact
+there, optionally after a NeMo pilot. Anything **served** is evaluated on the running NIM (**served-endpoint WER**,
+owned by `nemotron-speech`), not via the offline NeMo eval.
 
 ## 4. Get the data right — *SDG / Data*
 

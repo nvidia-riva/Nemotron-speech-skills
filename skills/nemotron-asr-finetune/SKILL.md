@@ -15,7 +15,7 @@ triggers:
   - cheapest way to improve ASR
   - orchestrate ASR fine-tuning
   - ASR customization pipeline
-version: "1.2.0"
+version: "1.3.0"
 license: Apache-2.0
 metadata:
   author: "Nemotron Speech Team"
@@ -87,7 +87,7 @@ Detailed registry, invocation, and handoff contracts in [`references/sub-skills.
 
 | Role (per the architecture) | Purpose | Sub-skill to invoke |
 |---|---|---|
-| **Research / Training** | NeMo configs, recipes, fine-tuning, checkpoint averaging | `nemo-speech-asr-finetune` |
+| **Research / Training** | NeMo configs, recipes, fine-tuning, checkpoint averaging; also owns the NeMo-side word-boosting and n-gram LM pilots | `nemo-speech-asr-finetune` |
 | **SDG / Data Designer** | Synthetic transcripts/text, noise profiling, vendor-data impact, blends | `data-designer` (synthetic **text**; audio via TTS in `nemotron-speech`); *placeholder:* `asr-data-profiling` |
 | **Evaluation** | Normalized WER, A/B forgetting, error analysis | Offline file WER → `nemo-speech-asr-finetune`; **served-endpoint WER → `nemotron-speech`** |
 | **Deployment / Optimization** | NIM/Riva export, checkpoint swap, NIM-build optimization, serving | `nemotron-speech` |
@@ -98,9 +98,12 @@ If a sub-skill is unavailable, say so, give the interim guidance from the refere
 
 The scoping in Stage 3 selects the lowest-cost rung that can meet the target. Summary; full docs-grounded ladder in [`references/path-selection.md`](references/path-selection.md).
 
-- **Word boosting** — a bounded set of known words/names/jargon. Runtime, no training. → Deployment sub-skill.
+- **Word boosting** — a bounded set of known words/names/jargon. **Two realizations that are different artifacts:**
+  *pilot (NeMo)* to prove lift offline via GPU-PB context biasing (`nemo-speech-asr-finetune`), or *deploy (Riva)* to
+  ship it via runtime `boosted_lm_score` (`nemotron-speech`) — different score systems, don't reuse one for the
+  other. Runtime, no training either way. See [`references/path-selection.md`](references/path-selection.md).
 - **Custom vocabulary / pronunciation** — OOV or consistently mispronounced terms. Deploy-time. → Deployment sub-skill.
-- **N-gram (KenLM) LM** — domain phrasing/word-sequences when you have text but little audio. **Two realizations that are different artifacts:** *pilot (NeMo)* to prove lift offline (`nemo-speech-asr-finetune`), or *deploy (Riva)* to ship it (`nemotron-speech`). Don't ship the pilot LM — rebuild it in Riva word-level format. See [`references/path-selection.md`](references/path-selection.md).
+- **N-gram (KenLM) LM** — domain phrasing/word-sequences when you have text but little audio. **Two realizations, built the same way but deployed differently by architecture:** *pilot (NeMo, NGPU-LM)* to prove lift offline (`nemo-speech-asr-finetune`), or *deploy (Riva)* to ship it (`nemotron-speech`). For **CTC**, rebuild the pilot corpus into a Riva word-level LM — don't ship the pilot artifact as-is. For **RNN-T/TDT**, the opposite: hand the pilot's `.nemo` artifact to Riva unchanged, no rebuild. See [`references/path-selection.md`](references/path-selection.md).
 - **Fine-tune** — real acoustic gaps (accents, noise, channel) with enough transcribed audio (NIM guide: 100+ h; ~10 h floor only if mixed to avoid catastrophic forgetting). **Below ~10 h, do not recommend fine-tuning — recommend word boosting instead** (severe catastrophic-forgetting/overfitting risk). → Research/Training.
 - **Train from scratch / cross-language transfer** — a new language with no suitable checkpoint (last resort). → Research/Training.
 

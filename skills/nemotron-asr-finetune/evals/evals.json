@@ -171,6 +171,35 @@
     ]
   },
   {
+    "id": "nemotron-asr-orchestrate-wordboost-nemo-pilot-001",
+    "question": "I have a local NeMo RNNT checkpoint and want to try word boosting on it before we even think about deploying to Riva. What do I do?",
+    "expected_skill": "nemotron-asr-finetune",
+    "expected_script": null,
+    "ground_truth": "Word boosting has a NeMo-only pilot realization owned by nemo-speech-asr-finetune that does not require Riva at all: GPU-PB context biasing via the boosting_tree config, using rnnt_decoding.*.boosting_tree (RNN-T/TDT) through speech_to_text_eval.py, weighted by boosting_tree_alpha. This uses a different score system than Riva's boosted_lm_score, so nothing from the pilot needs to be reused or converted for the customer to get a full offline answer.",
+    "expected_behavior": [
+      "Route to references/path-selection.md and recognize this as the NeMo-pilot realization of word boosting, not the Riva-deploy realization.",
+      "Describe GPU-PB / boosting_tree as the mechanism: decode-time shallow fusion, no retraining.",
+      "Give the RNN-T/TDT-specific config keys (rnnt_decoding.*.boosting_tree, boosting_tree_alpha) via speech_to_text_eval.py, not the CTC ones.",
+      "State that this is a complete, self-contained loop -- it does not require touching nemotron-speech or Riva at all.",
+      "Do not conflate NeMo's context_score/boosting_tree_alpha with Riva's boosted_lm_score scoring convention.",
+      "Route execution to nemo-speech-asr-finetune (and confirm it's reachable per workflow.md §4b) rather than nemotron-speech."
+    ]
+  },
+  {
+    "id": "nemotron-asr-orchestrate-ngram-rnnt-deploy-001",
+    "question": "I already validated an n-gram LM offline on my RNNT model in NeMo and now want to ship it to Riva. Do I need to rebuild it in a different format first?",
+    "expected_skill": "nemotron-asr-finetune",
+    "expected_script": null,
+    "ground_truth": "No rebuild is needed for RNNT specifically -- this is the one exception to the general pattern. The exact .nemo NGPU-LM artifact produced by the NeMo pilot (train_kenlm.py with save_nemo=True) is handed to nemotron-speech unchanged; nemotron-speech (references/pipelines.md) owns the exact riva-build flags/syntax, not the orchestrator. This is different from CTC, where a rebuild into a word-level LM is required for the Flashlight decoder.",
+    "expected_behavior": [
+      "Route to references/path-selection.md and recognize this as the n-gram LM deploy realization for an RNNT model specifically.",
+      "State that RNNT does NOT need a rebuild -- the pilot's .nemo artifact ships to nemotron-speech unchanged.",
+      "Defer exact riva-build flag syntax to nemotron-speech (references/pipelines.md) rather than reciting it from the orchestrator's own memory -- the orchestrator's job is the routing/artifact-carry-over fact, not the flag syntax.",
+      "Do not apply the CTC rebuild rule (word-level KenLM rebuild) to this RNNT case.",
+      "Note this is the opposite of word boosting, where the NeMo pilot parameters never carry over to Riva regardless of architecture."
+    ]
+  },
+  {
     "id": "nemotron-asr-orchestrate-negative-deploy-001",
     "question": "I already have a fine-tuned .nemo. Convert it with nemo2riva and deploy a Riva ASR NIM with riva-build and riva-deploy.",
     "expected_skill": null,

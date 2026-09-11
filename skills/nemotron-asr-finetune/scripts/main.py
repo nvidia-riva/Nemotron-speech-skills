@@ -147,6 +147,10 @@ ROUTES: tuple[Route, ...] = (
             r"\bsmall(?:er)? dataset\b",
             r"\bnot enough (?:data|audio|hours)\b",
             r"\bonly have\b.*\bhours?\b",
+            r"\bboosting.tree\b",
+            r"\bgpu-?pb\b",
+            r"\bcontext.biasing\b",
+            r"\bboosted_lm_score\b",
         ),
         next_steps=(
             "Read references/path-selection.md.",
