@@ -1,48 +1,6 @@
 ---
 name: "nemotron-speech"
-description: Routes NVIDIA Nemotron Speech (Formerly Riva) NIM tasks — deploys, runs, and tests ASR, TTS, and NMT NIMs on build.nvidia.com or self-hosted.
-triggers:
-  - Nemotron Speech
-  - deploy Riva NIM
-  - deploy ASR/TTS/NMT NIM
-  - Riva ASR
-  - Riva TTS
-  - Riva translation
-  - Parakeet
-  - Canary
-  - Whisper
-  - Nemotron ASR Streaming
-  - Magpie TTS
-  - DNT tag
-  - nemo2riva
-  - riva-build
-  - riva-deploy
-  - RMIR
-  - Riva NIM setup
-  - NGC API key
-  - force_eou
-  - Silero VAD
-  - Sortformer diarization
-  - chunk size Riva
-  - Riva HTTP
-  - Riva WebSocket
-  - grpc.nvcf.nvidia.com
-  - build.nvidia.com Riva
-  - custom TTS model
-  - fine-tuned TTS
-  - zero-shot TTS
-  - zero-shot voice cloning
-  - TTS pronunciation dictionary
-  - SSML Riva
-  - exaggeration_factor
-  - OGG_OPUS TTS
-  - TTS pipeline configuration
-  - IPA pronunciation TTS
-  - phoneme Riva TTS
-  - custom TTS pronunciation
-  - mispronounced word TTS
-  - how to pronounce Riva TTS
-  - TTS IPA candidates
+description: Routes NVIDIA Nemotron Speech (Formerly Riva) NIM tasks — deploys, runs, and tests ASR, TTS, and NMT NIMs on build.nvidia.com or self-hosted. Trigger phrases include "Nemotron Speech", "deploy Riva NIM", "deploy ASR/TTS/NMT NIM", "Riva ASR", "Riva TTS", "Riva translation", "Parakeet", "Canary", "Whisper", "Nemotron ASR Streaming", "Magpie TTS", "DNT tag", "nemo2riva", "riva-build", "riva-deploy", "RMIR", "Riva NIM setup", "NGC API key", "force_eou", "Silero VAD", "Sortformer diarization", "chunk size Riva", "Riva HTTP", "Riva WebSocket", "grpc.nvcf.nvidia.com", "build.nvidia.com Riva", "custom TTS model", "fine-tuned TTS", "zero-shot TTS", "zero-shot voice cloning", "TTS pronunciation dictionary", "SSML Riva", "exaggeration_factor", "OGG_OPUS TTS", "TTS pipeline configuration", "IPA pronunciation TTS", "phoneme Riva TTS", "custom TTS pronunciation", "mispronounced word TTS", "how to pronounce Riva TTS", "TTS IPA candidates".
 version: "1.0.0"
 license: Apache-2.0
 metadata:
